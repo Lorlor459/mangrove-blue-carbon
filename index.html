@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>红树林蓝碳秘密：地下碳宝库</title>
+<style>
+  :root{
+    --paper:#f6f1e5; --ink:#17302a; --deep:#0d2420; --muted:#64786f;
+    --green:#2f7d5c; --green-2:#57b573; --amber:#ffb03a; --coral:#c14e38;
+    --serif:"Songti SC","Noto Serif SC",Georgia,serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--deep); color:var(--ink); overflow:hidden;
+  }
+  header{
+    height:56px;display:flex;align-items:center;gap:14px;padding:0 18px;
+    background:#0a1c18;color:#e9e2cf;border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  header h1{font-family:var(--serif);font-size:18px;letter-spacing:.08em;font-weight:600}
+  header h1 em{font-style:normal;color:var(--amber)}
+  #eggCount{margin-left:auto;font-size:13px;color:#ffd98a;background:rgba(255,176,58,.14);
+    border:1px solid rgba(255,176,58,.35);padding:4px 12px;border-radius:99px;letter-spacing:.05em}
+  .app{display:grid;grid-template-columns:1fr 396px;height:calc(100vh - 56px)}
+
+  /* ---------- 舞台 ---------- */
+  .stagewrap{position:relative;overflow:hidden;background:#0d2420}
+  .stagewrap svg{width:100%;height:100%;display:block}
+  .stagewrap.shake svg{animation:shk .45s linear 3}
+  @keyframes shk{0%,100%{transform:translate(0,0)}20%{transform:translate(-7px,3px)}40%{transform:translate(6px,-3px)}60%{transform:translate(-5px,2px)}80%{transform:translate(4px,-2px)}}
+  #fx{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1.2s}
+  #fx.red{background:radial-gradient(circle at 50% 70%, transparent 30%, rgba(193,60,30,.55));opacity:1}
+  #fx.glow{background:radial-gradient(circle at 60% 75%, rgba(255,176,58,.14), transparent 60%);opacity:1}
+
+  .callout{
+    position:absolute;left:16px;top:14px;max-width:420px;z-index:5;
+    background:rgba(10,28,24,.86);color:#f3ecd8;border:1px solid rgba(255,176,58,.4);
+    border-radius:14px;padding:12px 16px;font-size:14.5px;line-height:1.75;
+    box-shadow:0 18px 40px -22px rgba(0,0,0,.8);backdrop-filter:blur(4px);
+    transition:opacity .5s,transform .5s;
+  }
+  .callout b{color:var(--amber)}
+  .callout.hide{opacity:0;transform:translateY(-8px)}
+  .callout .big{font-family:var(--serif);font-size:22px;color:var(--amber);letter-spacing:.04em}
+
+  /* ---------- 粒子（锚点：纯色圆点 + 同色半透明外圈，无辉光滤镜） ---------- */
+  .cpart .core{fill:var(--amber)}
+  .cpart .halo{fill:var(--amber);opacity:.22}
+  .cpart circle{transition:transform 1.6s cubic-bezier(.35,.65,.3,1),opacity 1.6s ease,fill .9s}
+  .cpart.co2 .core{fill:#93a29d} .cpart.co2 .halo{fill:#93a29d;opacity:.16}
+  .cpart.dim .core{fill:#a8853f} .cpart.dim .halo{fill:#a8853f;opacity:.16}
+  .o2p{fill:#7fc7de;filter:drop-shadow(0 0 4px rgba(127,199,222,.8));transition:transform 1.4s cubic-bezier(.4,.5,.4,1),opacity 1.4s}
+  .hotspot{cursor:pointer}
+  .hot-c{fill:rgba(255,176,58,.22);stroke:rgba(255,214,130,.75);stroke-width:1.5;animation:pulse 2.2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{r:23;opacity:.7}50%{r:28;opacity:1}}
+  .microbe path{stroke:#cbbd97;stroke-width:2.4;fill:none;stroke-linecap:round;animation:wig 2.6s ease-in-out infinite}
+  .microbe.awake path{stroke:#ff8563;animation:wig .28s linear infinite}
+  @keyframes wig{0%,100%{transform:translate(0,0)}50%{transform:translate(3px,-3px)}}
+  .o2dot{animation:wig 1.8s ease-in-out infinite}
+
+  /* ---------- 面板 ---------- */
+  .panel{background:var(--paper);padding:16px 18px 12px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+  .tabs{display:flex;gap:8px}
+  .tab{flex:1;font-family:inherit;font-size:13.5px;padding:9px 4px;border-radius:12px;cursor:pointer;
+    border:1px solid rgba(23,48,42,.22);background:#fff;color:var(--muted);letter-spacing:.03em;
+    transition:all .25s}
+  .tab.on{background:var(--deep);color:#ffe9bd;border-color:var(--deep);font-weight:600}
+  .narr{font-size:15px;line-height:1.95;min-height:5.2em;color:var(--ink);animation:fadein .6s}
+  .narr b{color:var(--green)}
+  .narr .hl{color:var(--coral);font-weight:600}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .steps{display:flex;gap:7px;flex-wrap:wrap}
+  .steps button{flex:1;min-width:62px;font-family:inherit;font-size:13px;padding:9px 2px;border-radius:11px;
+    border:1px solid rgba(23,48,42,.22);background:#fff;cursor:pointer;color:var(--ink);transition:all .25s}
+  .steps button:hover{border-color:var(--green);color:var(--green)}
+  .steps button.done{background:#eaf3ec;color:var(--green);border-color:#bcd9c6}
+  .steps button.on{background:var(--green);color:#fff;border-color:var(--green);font-weight:600}
+  .btn-primary{width:100%;font-family:inherit;font-size:15.5px;font-weight:600;letter-spacing:.05em;
+    padding:13px;border-radius:14px;border:none;cursor:pointer;color:#fff;
+    background:linear-gradient(180deg,#2f7d5c,#266449);box-shadow:0 14px 24px -14px rgba(31,90,66,.9);
+    transition:transform .2s}
+  .btn-primary:hover{transform:translateY(-2px)}
+  .btn-ghost{font-family:inherit;font-size:14px;padding:11px;border-radius:13px;cursor:pointer;width:100%;
+    background:#fff;border:1px solid rgba(23,48,42,.25);color:var(--ink)}
+  .fate-choices{display:grid;gap:10px}
+  .fchoice{display:flex;align-items:center;gap:12px;font-family:inherit;text-align:left;cursor:pointer;
+    padding:14px 16px;border-radius:15px;font-size:16px;font-weight:600;letter-spacing:.04em;
+    transition:transform .2s,box-shadow .2s}
+  .fchoice:hover{transform:translateY(-2px)}
+  .fchoice small{display:block;font-weight:400;font-size:12.5px;margin-top:3px;letter-spacing:0}
+  .fchoice .emo{font-size:28px;line-height:1;flex:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18))}
+  .result .tit .emo{font-size:26px;margin-right:7px}
+  .fchoice.danger{background:linear-gradient(180deg,#fdf1ec,#f8e0d6);border:1.5px solid rgba(193,78,56,.5);color:#8c3520}
+  .fchoice.safe{background:linear-gradient(180deg,#eff7ef,#dfeede);border:1.5px solid rgba(47,125,92,.5);color:#1d5c40}
+  .fchoice.mid{background:linear-gradient(180deg,#fbf3dd,#f4ead0);border:1.5px solid rgba(214,158,58,.55);color:#8a6114}
+  .fchoice.plan .ptag{align-self:stretch;display:flex;align-items:center;flex:none;
+    font-size:12.5px;font-weight:600;letter-spacing:.2em;writing-mode:vertical-rl;opacity:.85}
+  .fchoice.plan .pbody{display:block;flex:1}
+  .fchoice.plan{font-size:17px;padding:13px 15px}
+  .result{border-radius:15px;padding:15px 17px;font-size:14.5px;line-height:1.9;animation:fadein .6s}
+  .result.bad{background:#fbeae4;border:1px solid rgba(193,78,56,.4)}
+  .result.good{background:#eaf4ec;border:1px solid rgba(47,125,92,.4)}
+  .result p{margin-bottom:7px}
+  .result .tit{font-family:var(--serif);font-size:19px;margin-bottom:9px;letter-spacing:.06em}
+  .result.bad .tit{color:var(--coral)} .result.good .tit{color:var(--green)}
+  .result.mid{background:#fbf3dd;border:1px solid rgba(214,158,58,.5)}
+  .result.mid .tit{color:#a06b12}
+  .cmp-table{width:100%;border-collapse:collapse;font-size:13.5px;animation:fadein .6s;background:#fff;border-radius:13px;overflow:hidden;box-shadow:0 8px 20px -14px rgba(0,0,0,.35)}
+  .cmp-table th,.cmp-table td{padding:8px 9px;text-align:center;border-bottom:1px solid rgba(23,48,42,.09)}
+  .cmp-table th{background:var(--deep);color:#ffe9bd;font-weight:600;font-size:13px}
+  .cmp-table td:first-child{text-align:left;color:var(--muted);font-size:12.5px}
+  .cmp-table tr:last-child td{color:var(--coral);font-weight:700}
+  .cmp-table tr:last-child td:nth-child(3){color:var(--green)}
+  .src{margin-top:auto;font-size:11.5px;line-height:1.7;color:var(--muted);border-top:1px dashed rgba(23,48,42,.2);padding-top:9px}
+
+  /* ---------- 彩蛋弹窗 ---------- */
+  .modal{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
+    background:rgba(8,20,17,.6);animation:fadein .3s}
+  .modal .card{width:min(420px,88vw);background:var(--paper);border-radius:20px;padding:26px 26px 20px;
+    box-shadow:0 30px 70px -30px rgba(0,0,0,.9);text-align:center;animation:pop .35s cubic-bezier(.2,1.2,.4,1)}
+  @keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+  .modal .em{font-size:44px;animation:bob 2s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  .modal h3{font-family:var(--serif);font-size:20px;margin:10px 0 10px;letter-spacing:.06em;color:var(--deep)}
+  .modal p{font-size:14.5px;line-height:1.9;text-align:left;color:#2c423b}
+  .modal p b{color:var(--coral)}
+  .modal button{margin-top:18px;font-family:inherit;font-size:14px;padding:10px 34px;border-radius:99px;
+    border:none;cursor:pointer;background:var(--deep);color:#ffe9bd;letter-spacing:.08em}
+  .newegg{position:fixed;top:64px;right:18px;z-index:59;background:var(--amber);color:#3a2500;
+    font-size:13px;font-weight:700;padding:8px 16px;border-radius:99px;box-shadow:0 12px 26px -12px rgba(0,0,0,.6);
+    animation:pop .4s;letter-spacing:.05em}
+
+  /* ---------- 开场 ---------- */
+  #intro{position:fixed;inset:0;z-index:70;background:radial-gradient(120% 100% at 50% 0%,#123830,#0a1c18 70%);
+    display:flex;align-items:center;justify-content:center;transition:opacity .8s}
+  #intro.gone{opacity:0;pointer-events:none}
+  .intro-card{text-align:center;color:#e9e2cf;max-width:560px;padding:24px}
+  .intro-card .eyebrow{font-size:13px;letter-spacing:.4em;color:#9fbcb0;margin-bottom:16px}
+  .intro-card h2{font-family:var(--serif);font-size:42px;letter-spacing:.1em;line-height:1.35;margin-bottom:18px}
+  .intro-card h2 em{font-style:normal;color:var(--amber);text-shadow:0 0 30px rgba(255,176,58,.5)}
+  .intro-card p{font-size:15px;line-height:2;color:#b9cec6;margin-bottom:30px}
+  #startBtn{font-family:inherit;font-size:17px;letter-spacing:.2em;padding:15px 58px;border-radius:99px;
+    border:1px solid rgba(255,176,58,.6);background:rgba(255,176,58,.12);color:#ffd98a;cursor:pointer;transition:all .3s}
+  #startBtn:hover{background:var(--amber);color:#3a2500;box-shadow:0 0 40px rgba(255,176,58,.35)}
+
+  @media (max-width:1000px){
+    body{overflow:auto}
+    .app{grid-template-columns:1fr;height:auto}
+    .stagewrap{height:52vh;min-height:300px}
+    .panel{overflow:visible}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>红树林蓝碳秘密 · <em>地下碳宝库</em></h1>
+  <span id="eggCount">🎁 彩蛋 0 / 8</span>
+</header>
+
+<div class="app">
+  <div class="stagewrap" id="stagewrap">
+    <div id="stage"></div>
+    <div id="fx"></div>
+    <div id="callout" class="callout hide"></div>
+  </div>
+  <aside class="panel">
+    <div class="tabs">
+      <button class="tab on" data-ch="0">① 碳的旅程</button>
+      <button class="tab" data-ch="1">② 对比实验</button>
+      <button class="tab" data-ch="2">③ 命运的选择</button>
+    </div>
+    <div id="panelBody" style="display:flex;flex-direction:column;gap:12px;flex:1"></div>
+    <div class="src">数据来源：明湾学校七年级近海生态研究项目（土壤碳占比 49–98%、储碳为普通森林 3–4 倍、破坏 1 公顷释放 500–1000 吨碳、全球已损失 35–50% 等均取自该研究资料，为科普量级估算）。</div>
+  </aside>
+</div>
+
+<div id="intro">
+  <div class="intro-card">
+    <p class="eyebrow">一 粒 碳 的 地 下 旅 程</p>
+    <h2>红树林把碳藏在哪儿？<br>不在枝头，在<em>脚下的泥</em>里</h2>
+    <p>这里的泥，一公顷能攥住 500–1000 吨碳，是普通森林的 3–4 倍。<br>
+       先看一粒碳怎么掉进泥里、一睡一百年；再跟森林比一场「谁锁得住碳」；<br>
+       最后，这片林子的命运，由你签字决定。<br>
+       对了——画面里闪光的圈圈一共有 8 个，每个都藏着秘密。</p>
+    <button id="startBtn">推 门 进 去</button>
+  </div>
+</div>
+
+<script>
+/* ================= 工具 ================= */
+var $ = function(s){ return document.querySelector(s); };
+var $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
+var SVGNS = 'http://www.w3.org/2000/svg';
+var wait = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
+function mk(tag, attrs, parent){
+  var n = document.createElementNS(SVGNS, tag);
+  for(var k in attrs) n.setAttribute(k, attrs[k]);
+  if(parent) parent.appendChild(n);
+  return n;
+}
+function spawnP(group, x, y, cls){
+  var g = mk('g', {'class':'cpart' + (cls ? ' ' + cls : '')}, group);
+  mk('circle', {cx:0, cy:0, r:13, 'class':'halo'}, g);
+  mk('circle', {cx:0, cy:0, r:7, 'class':'core'}, g);
+  g.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+  return g;
+}
+function moveP(p, x, y, dur){
+  p.style.transition = 'transform ' + (dur||1500) + 'ms cubic-bezier(.35,.65,.3,1), opacity ' + (dur||1500) + 'ms ease, fill .9s';
+  p.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+}
+function rnd(a, b){ return a + Math.random() * (b - a); }
+
+/* ================= 彩蛋 ================= */
+var EGGS = {
+  soil:    {t:'泥土层的地基', e:'🟤', x:'红树林土壤的碳，可以占到整个生态系统碳储量的 <b>49%–98%</b>！这些碳可能已经在地下沉睡了数百年，甚至上千年。'},
+  hypoxia: {t:'缺氧保险箱',   e:'🚫', x:'潮间带的泥土经常被海水浸泡，<b>缺氧</b>环境让微生物分解变慢，碳就能长期保存——就像被锁进一个密封的保险箱！'},
+  roots:   {t:'根也储碳',     e:'🌱', x:'红树的根系本身也储存碳，死亡后会直接变成土壤有机碳。根系还能稳固泥土，防止碳流失。'},
+  breath:  {t:'会呼吸的根',   e:'💨', x:'这些伸出水面的小尖芽叫<b>呼吸根</b>，它们让红树能在被海水淹没的环境里正常"呼吸"。'},
+  tide:    {t:'时间胶囊',     e:'🌊', x:'潮水每天带来新的泥沙，一层一层覆盖落叶和死根，把碳"埋"进沉积层——就像一个慢慢封口的时间胶囊。'},
+  microbe: {t:'睡着的小工人', e:'🦠', x:'缺氧环境让微生物的分解速度减慢 <b>10–100 倍</b>，它们几乎在"冬眠"——碳就跑不掉了。'},
+  anchor:  {t:'天然防波堤',   e:'🛡️', x:'红树的根系不仅封存碳，还像<b>天然防波堤</b>一样抓住泥土、减弱海浪，防止海岸被冲刷——碳库也因此更安全。'},
+  coast:   {t:'海岸守护者',   e:'🏠', x:'台风来袭时，红树林能明显减弱风浪，保护海岸边的村庄和农田。<b>保护红树林 = 保护海岸 + 保护碳库。</b>'}
+};
+var eggsFound = {};
+function foundCount(){ return Object.keys(eggsFound).length; }
+function updateEggCount(){ $('#eggCount').textContent = '🎁 彩蛋 ' + foundCount() + ' / 8'; }
+function openEgg(id){
+  var g = EGGS[id]; if(!g) return;
+  var isNew = !eggsFound[id];
+  eggsFound[id] = true; updateEggCount();
+  var m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = '<div class="card"><div class="em">' + g.e + '</div>' +
+    '<h3>' + g.t + '</h3><p>' + g.x + '</p><button>知 道 了</button></div>';
+  document.body.appendChild(m);
+  m.querySelector('button').addEventListener('click', function(){ m.remove(); });
+  m.addEventListener('click', function(ev){ if(ev.target === m) m.remove(); });
+  if(isNew){
+    var tip = document.createElement('div'); tip.className = 'newegg';
+    tip.textContent = '🎉 收集新彩蛋 ' + foundCount() + '/8';
+    document.body.appendChild(tip);
+    setTimeout(function(){ tip.remove(); }, 2200);
+  }
+}
+document.addEventListener('click', function(ev){
+  var h = ev.target.closest ? ev.target.closest('.hotspot') : null;
+  if(h) openEgg(h.dataset.egg);
+});
+
+/* ================= 场景绘制 ================= */
+function treeSVG(){
+  return '<g class="trunkG">' +
+    '<path d="M -7 0 C -10 -60 -5 -120 0 -150" stroke="#5a4632" stroke-width="11" fill="none" stroke-linecap="round"/>' +
+    '<path d="M 0 -148 C 7 -158 11 -166 13 -175" stroke="#5a4632" stroke-width="7" fill="none" stroke-linecap="round"/>' +
+    '<ellipse cx="-30" cy="-170" rx="42" ry="24" fill="#3e8a55"/>' +
+    '<ellipse cx="26" cy="-182" rx="46" ry="27" fill="#46a063"/>' +
+    '<ellipse cx="-2" cy="-208" rx="48" ry="28" fill="#57b573"/>' +
+    '<path d="M -4 -6 C -18 2 -30 4 -40 6" stroke="#5a4632" stroke-width="6" fill="none" stroke-linecap="round"/>' +
+    '<path d="M 0 -4 C 12 2 26 5 36 7" stroke="#5a4632" stroke-width="6" fill="none" stroke-linecap="round"/>' +
+    '<path d="M -2 -5 C -6 3 -12 6 -20 9" stroke="#4c3a29" stroke-width="5" fill="none" stroke-linecap="round"/>' +
+    '<g class="uroots">' +
+      '<path d="M 0 4 C -16 30 -30 55 -42 82" stroke="#4a3a28" stroke-width="7" fill="none" stroke-linecap="round"/>' +
+      '<path d="M 0 4 C 0 40 -2 70 -4 100" stroke="#4a3a28" stroke-width="7" fill="none" stroke-linecap="round"/>' +
+      '<path d="M 0 4 C 14 28 26 50 36 74" stroke="#4a3a28" stroke-width="7" fill="none" stroke-linecap="round"/>' +
+    '</g></g>';
+}
+function hotspotsSVG(){
+  var hs = [['tide',760,352,'🌊'],['breath',560,450,'💨'],['roots',330,545,'🌱'],
+            ['anchor',242,470,'🛡️'],['soil',905,648,'🟤'],['hypoxia',662,487,'🚫'],
+            ['microbe',418,602,'🦠'],['coast',1102,418,'🏠']];
+  return '<g>' + hs.map(function(h){
+    return '<g class="hotspot" data-egg="' + h[0] + '" transform="translate(' + h[1] + ',' + h[2] + ')">' +
+      '<circle r="23" class="hot-c"/><text y="8" text-anchor="middle" font-size="25">' + h[3] + '</text></g>';
+  }).join('') + '</g>';
+}
+function mangroveScene(id, opts){
+  opts = opts || {};
+  return '<svg viewBox="0 0 1200 720" preserveAspectRatio="xMidYMid slice">' +
+  '<defs>' +
+    '<linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9d8de"/><stop offset="1" stop-color="#e8f3e4"/></linearGradient>' +
+    '<linearGradient id="watG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a9a8e"/><stop offset="1" stop-color="#2c6a63"/></linearGradient>' +
+    '<linearGradient id="soilG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5e4a33"/><stop offset="1" stop-color="#332619"/></linearGradient>' +
+  '</defs>' +
+  '<rect width="1200" height="346" fill="url(#skyG)"/>' +
+  '<circle cx="1040" cy="86" r="44" fill="#ffd98a" opacity=".9"/>' +
+  '<ellipse cx="220" cy="90" rx="70" ry="20" fill="#fff" opacity=".7"/>' +
+  '<ellipse cx="290" cy="102" rx="50" ry="16" fill="#fff" opacity=".6"/>' +
+  '<path d="M 820 70 q 10 -12 20 0 q 10 -12 20 0" stroke="#5c7a72" stroke-width="2.5" fill="none"/>' +
+  '<path d="M 860 84 q 8 -10 16 0 q 8 -10 16 0" stroke="#5c7a72" stroke-width="2.5" fill="none"/>' +
+  '<rect y="346" width="1200" height="114" fill="url(#watG)" opacity=".85" id="' + id + '-water"/>' +
+  '<line x1="0" y1="352" x2="1200" y2="352" stroke="#bfe8de" stroke-width="2" stroke-dasharray="10 8" opacity=".8"/>' +
+  '<path d="M 630 400 q 14 -8 28 0 q -14 10 -28 0" fill="#8fb7ad"/>' +
+  '<path d="M 700 418 q 11 -7 22 0 q -11 8 -22 0" fill="#8fb7ad"/>' +
+  '<g transform="translate(864,452)">' +
+    '<g stroke="#4c3a29" stroke-width="3.2" stroke-linecap="round">' +
+      '<line x1="-9" y1="7" x2="-13" y2="13"/><line x1="-3" y1="8" x2="-4" y2="14"/>' +
+      '<line x1="4" y1="8" x2="5" y2="14"/><line x1="9" y1="7" x2="13" y2="13"/>' +
+    '</g>' +
+    '<path d="M 9 2 C 16 -2 22 -9 23 -17" stroke="#c96a4a" stroke-width="4.6" fill="none" stroke-linecap="round"/>' +
+    '<path d="M 17 -25 a 8 7.2 0 1 1 13 6.4 L 20 -14 Z" fill="#c96a4a"/>' +
+    '<ellipse rx="12" ry="7.5" fill="#c96a4a"/>' +
+    '<path d="M -11 2 q -6 2 -8 6" stroke="#c96a4a" stroke-width="3.6" fill="none" stroke-linecap="round"/>' +
+    '<line x1="-4" y1="-7" x2="-5" y2="-12" stroke="#b25a3e" stroke-width="2.6"/>' +
+    '<line x1="4" y1="-7" x2="5" y2="-12" stroke="#b25a3e" stroke-width="2.6"/>' +
+    '<circle cx="-5" cy="-14.5" r="3.8" fill="#fdfaf2"/><circle cx="-4.2" cy="-15.1" r="1.9" fill="#17302a"/>' +
+    '<circle cx="5" cy="-14.5" r="3.8" fill="#fdfaf2"/><circle cx="5.8" cy="-15.1" r="1.9" fill="#17302a"/>' +
+  '</g>' +
+  '<g transform="translate(788,454)">' +
+    '<path d="M -13 -3 C -19 -7 -21 -13 -20 -19 L -12 -11 Z" fill="#5a4632"/>' +
+    '<path d="M -20 -19 L -24 -24 M -20 -19 L -17 -26" stroke="#5a4632" stroke-width="2.8" stroke-linecap="round"/>' +
+    '<path d="M -15 -2 C -15 -13 -6 -19 4 -17 C 13 -15 17 -8 15 -2 C 13 4 -11 6 -15 -2 Z" fill="#5a4632"/>' +
+    '<path d="M -10 2 C -6 5 8 5 13 0" stroke="#e8dcc0" stroke-width="3.4" fill="none" stroke-linecap="round"/>' +
+    '<path d="M -6 -16 q 5 -6 12 -3 l -2.5 4.5 z" fill="#57b573"/>' +
+    '<path d="M 3 4 l -3.4 6 M 3 4 l 3.4 6" stroke="#4c3a29" stroke-width="2.2" stroke-linecap="round"/>' +
+    '<circle cx="9" cy="-11" r="4.4" fill="#fdfaf2"/><circle cx="10" cy="-11.5" r="2.3" fill="#17302a"/><circle cx="10.8" cy="-12.3" r=".8" fill="#fdfaf2"/>' +
+    '<path d="M 14 -6 q 2 1.2 3.4 .4" stroke="#4c3a29" stroke-width="1.6" fill="none" stroke-linecap="round"/>' +
+  '</g>' +
+  '<g transform="translate(932,106)">' +
+    '<path d="M -2 -4 C -10 -18 -24 -23 -33 -19 C -25 -10 -13 -4 -2 -4 Z" fill="#f1ead8"/>' +
+    '<path d="M 0 2 C 10 12 22 15 31 11 C 23 2 10 -2 0 2 Z" fill="#f1ead8"/>' +
+    '<ellipse cx="0" cy="0" rx="16" ry="9" fill="#fdfaf2"/>' +
+    '<path d="M -13 -2 C -19 -4 -23 -7 -26 -11" stroke="#fdfaf2" stroke-width="7" fill="none" stroke-linecap="round"/>' +
+    '<path d="M -25 -13 L -44 -17 L -26 -6 Z" fill="#17302a"/>' +
+    '<circle cx="-26.5" cy="-11.5" r="3.6" fill="#17302a"/><circle cx="-27.4" cy="-12.2" r="1.1" fill="#fdfaf2"/>' +
+    '<path d="M -2 8 l -2 5 M 5 8 l 1.4 5" stroke="#d8a13a" stroke-width="2.2" stroke-linecap="round"/>' +
+  '</g>' +
+  '<rect y="460" width="1200" height="260" fill="url(#soilG)"/>' +
+  '<line x1="0" y1="512" x2="1200" y2="512" stroke="#000" stroke-opacity=".22" stroke-dasharray="6 7"/>' +
+  '<line x1="0" y1="572" x2="1200" y2="572" stroke="#000" stroke-opacity=".22" stroke-dasharray="6 7"/>' +
+  '<line x1="0" y1="632" x2="1200" y2="632" stroke="#000" stroke-opacity=".22" stroke-dasharray="6 7"/>' +
+  '<text x="26" y="492" font-size="13" fill="#d8c9a3" opacity=".8">0–10 年</text>' +
+  '<text x="26" y="550" font-size="13" fill="#d8c9a3" opacity=".8">10–50 年</text>' +
+  '<text x="26" y="610" font-size="13" fill="#d8c9a3" opacity=".8">50–100 年</text>' +
+  '<text x="26" y="676" font-size="13" fill="#d8c9a3" opacity=".8">100 年以上 · 深层碳库</text>' +
+  '<g class="microbe"><path d="M 408 596 q 6 -6 12 0 q 6 6 12 0"/><path d="M 428 610 q 5 -5 10 0 q 5 5 10 0"/></g>' +
+  '<g class="microbe"><path d="M 672 636 q 6 -6 12 0 q 6 6 12 0"/><path d="M 692 650 q 5 -5 10 0"/></g>' +
+  '<g transform="translate(232,462) scale(.92)">' + treeSVG() + '</g>' +
+  '<g transform="translate(330,464) scale(1.06)">' + treeSVG() + '</g>' +
+  '<g transform="translate(424,462) scale(.84)">' + treeSVG() + '</g>' +
+  '<g stroke="#6b5238" stroke-width="3" stroke-linecap="round">' +
+    '<line x1="478" y1="462" x2="478" y2="447"/><line x1="492" y1="462" x2="492" y2="443"/>' +
+    '<line x1="506" y1="462" x2="506" y2="448"/><line x1="520" y1="462" x2="520" y2="444"/>' +
+    '<line x1="262" y1="462" x2="262" y2="450"/><line x1="276" y1="462" x2="276" y2="446"/>' +
+    '<line x1="290" y1="462" x2="290" y2="451"/><line x1="304" y1="462" x2="304" y2="447"/>' +
+  '</g>' +
+  '<g id="' + id + '-sed1" opacity="0"><rect y="464" width="1200" height="48" fill="#6b5238" opacity=".9"/></g>' +
+  '<g id="' + id + '-sed2" opacity="0"><rect y="512" width="1200" height="60" fill="#5a4430" opacity=".95"/></g>' +
+  '<g id="' + id + '-sed3" opacity="0"><rect y="572" width="1200" height="60" fill="#4a3726" opacity=".95"/></g>' +
+  '<g transform="translate(640,487)">' +
+    '<circle r="15" fill="#dfeeea" stroke="#2f7d5c" stroke-width="2"/>' +
+    '<text y="5" text-anchor="middle" font-size="12" font-weight="700" fill="#2f7d5c">O₂</text>' +
+    '<line x1="-11" y1="-11" x2="11" y2="11" stroke="#c14e38" stroke-width="3" stroke-linecap="round"/>' +
+    '<text y="34" text-anchor="middle" font-size="12" fill="#d8c9a3">缺氧带</text>' +
+  '</g>' +
+  '<g id="' + id + '-bank"></g><g id="' + id + '-sky"></g><g id="' + id + '-tmp"></g>' +
+  (opts.hotspots !== false ? hotspotsSVG() : '') +
+  '</svg>';
+}
+function compareScene(){
+  return '<svg viewBox="0 0 1200 640" preserveAspectRatio="xMidYMid slice">' +
+  '<defs>' +
+    '<linearGradient id="csky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9d8de"/><stop offset="1" stop-color="#e8f3e4"/></linearGradient>' +
+    '<linearGradient id="cwat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a9a8e"/><stop offset="1" stop-color="#2c6a63"/></linearGradient>' +
+  '</defs>' +
+  '<rect width="1200" height="640" fill="url(#csky)"/>' +
+  '<circle cx="90" cy="70" r="30" fill="#ffd98a" opacity=".9"/><circle cx="1110" cy="66" r="30" fill="#ffd98a" opacity=".9"/>' +
+  '<text x="300" y="42" text-anchor="middle" font-size="21" font-weight="700" fill="#4c6b3c" font-family="Songti SC,serif">普通森林</text>' +
+  '<text x="900" y="42" text-anchor="middle" font-size="21" font-weight="700" fill="#1d5c40" font-family="Songti SC,serif">红树林</text>' +
+  '<line x1="600" y1="14" x2="600" y2="626" stroke="#17302a" stroke-width="2" stroke-dasharray="8 9" opacity=".4"/>' +
+  '<rect y="400" width="600" height="240" fill="#5a4a33"/>' +
+  '<line x1="0" y1="470" x2="600" y2="470" stroke="#000" stroke-opacity=".2" stroke-dasharray="6 7"/>' +
+  '<text x="20" y="452" font-size="12" fill="#d8c9a3" opacity=".85">土壤浅层 · 有氧气流通</text>' +
+  '<g transform="translate(300,402) scale(.88)">' +
+    '<path d="M -8 0 C -12 -90 -6 -180 0 -225" stroke="#6b4f2e" stroke-width="13" fill="none" stroke-linecap="round"/>' +
+    '<ellipse cx="-46" cy="-248" rx="58" ry="34" fill="#4c7d3a"/>' +
+    '<ellipse cx="40" cy="-262" rx="60" ry="36" fill="#5f9648"/>' +
+    '<ellipse cx="-4" cy="-296" rx="62" ry="36" fill="#6fae54"/>' +
+  '</g>' +
+  '<g id="cmp-o2L">' +
+    [0,1,2,3,4,5,6,7].map(function(i){
+      return '<circle class="o2dot" cx="' + (60 + i * 66) + '" cy="' + (500 + (i % 3) * 42) + '" r="7" fill="#7fc7de" opacity=".85"/>';
+    }).join('') +
+  '</g>' +
+  '<rect x="600" y="346" width="600" height="114" fill="url(#cwat)" opacity=".85"/>' +
+  '<line x1="600" y1="352" x2="1200" y2="352" stroke="#bfe8de" stroke-width="2" stroke-dasharray="10 8" opacity=".8"/>' +
+  '<rect x="600" y="460" width="600" height="180" fill="url(#soilG)" opacity="0" id="cmp-soilR" style="opacity:0"/>' +
+  '<rect x="600" y="460" width="600" height="180" fill="#3b5c52"/>' +
+  '<line x1="600" y1="516" x2="1200" y2="516" stroke="#000" stroke-opacity=".22" stroke-dasharray="6 7"/>' +
+  '<line x1="600" y1="572" x2="1200" y2="572" stroke="#000" stroke-opacity=".22" stroke-dasharray="6 7"/>' +
+  '<text x="620" y="540" font-size="12" fill="#d8c9a3" opacity=".85">深层 · 缺氧 · 泥沙层层覆盖</text>' +
+  '<g transform="translate(900,462) scale(.95)">' + treeSVG() + '</g>' +
+  '<g stroke="#6b5238" stroke-width="3" stroke-linecap="round">' +
+    '<line x1="1010" y1="462" x2="1010" y2="448"/><line x1="1024" y1="462" x2="1024" y2="444"/>' +
+    '<line x1="1038" y1="462" x2="1038" y2="449"/>' +
+  '</g>' +
+  '<g id="cmp-bankL"></g><g id="cmp-bankR"></g><g id="cmp-tmp"></g>' +
+  '</svg>';
+}
+
+/* ================= 章节框架 ================= */
+var stage = $('#stage'), panelBody = $('#panelBody'),
+    calloutEl = $('#callout'), stagewrap = $('#stagewrap'), fx = $('#fx');
+var CH = 0, jBusy = false, cBusy = false, fBusy = false, fPond = null, fPark = null;
+
+function callout(html, hide){
+  if(hide){ calloutEl.classList.add('hide'); return; }
+  calloutEl.innerHTML = html;
+  calloutEl.classList.remove('hide');
+}
+function narr(html){
+  var n = $('#narr');
+  if(n){ n.innerHTML = html; n.style.animation = 'none'; void n.offsetWidth; n.style.animation = ''; }
+}
+function setStage(svg){ stage.innerHTML = svg; }
+
+/* ================= ① 碳的旅程 ================= */
+var jStep = 0, jParts = [];
+function panelJourney(){
+  panelBody.innerHTML =
+    '<p class="narr" id="narr">天上飘着的每一粒亮点，都是一口 CO₂。点一个年份，看这片林子怎么把碳<b>一层一层「埋」进泥里</b>。</p>' +
+    '<div class="steps">' +
+      '<button data-t="0" class="on">第 0 年</button><button data-t="1">1 年</button>' +
+      '<button data-t="10">10 年</button><button data-t="50">50 年</button><button data-t="100">100 年</button>' +
+    '</div>' +
+    '<button class="btn-primary" id="jPlay">▶ 自动播放整段旅程</button>';
+  $$('#panelBody .steps button').forEach(function(b){
+    b.addEventListener('click', function(){ if(!jBusy) jGo(parseInt(b.dataset.t, 10)); });
+  });
+  $('#jPlay').addEventListener('click', async function(){
+    if(jBusy) return;
+    jBusy = true; this.disabled = true; this.textContent = '⏳ 旅程播放中…';
+    var seq = [1, 10, 50, 100];
+    for(var i = 0; i < seq.length; i++){ await jGo(seq[i]); await wait(500); }
+    jBusy = false;
+  });
+}
+function markStep(t){
+  $$('#panelBody .steps button').forEach(function(b){
+    var v = parseInt(b.dataset.t, 10);
+    b.classList.toggle('on', v === t);
+    b.classList.toggle('done', v < t);
+  });
+}
+function fadeTo(el, op, ms){
+  el.style.transition = 'opacity ' + (ms || 1200) + 'ms';
+  setTimeout(function(){ el.style.opacity = op; }, 30);
+}
+async function jGo(t){
+  if(t <= jStep) return;
+  var skyG = $('#j-sky'), tmp = $('#j-tmp'), bank = $('#j-bank');
+  var canopy = [[210,268],[318,262],[408,272],[240,292],[300,294],[388,294],[228,248],[352,240],[300,268],[266,278],[334,278],[386,258]];
+
+  if(t === 1){
+    markStep(1); jStep = 1;
+    narr('第 1 年 · 树叶把空气里的碳「摘」了下来，揉进自己的身体——这就是<b>光合作用</b>。');
+    callout('🌳 看见了吗？碳粒子顺着叶脉，流进了树干。');
+    jParts.forEach(function(p, i){
+      setTimeout(function(){ moveP(p, canopy[i][0], canopy[i][1], 1600); }, i * 160);
+    });
+    await wait(3200);
+    callout('碳到手了。别急——<b>真正的宝库还在脚底下</b>，故事才刚开头。');
+    return;
+  }
+  if(t === 10){
+    markStep(10); jStep = 10;
+    narr('第 10 年 · 叶子黄了，「扑通」落进水里。碳搭着落叶这班船沉到泥面——潮水捎来的泥沙哗啦一层，<b>把它盖了个严实</b>。');
+    callout('🍂 像盖被子：一层落叶，盖一层泥。');
+    jParts.forEach(function(p, i){
+      setTimeout(function(){
+        p.classList.remove('co2');
+        moveP(p, rnd(200, 440), rnd(470, 492), 1800);
+      }, i * 140);
+    });
+    fadeTo($('#j-sed1'), 1, 1400);
+    await wait(3400);
+    callout('✅ 第一层封好了。接下来，该「缺氧」出场了。');
+    return;
+  }
+  if(t === 50){
+    markStep(50); jStep = 50;
+    narr('第 50 年 · 碳越埋越深。氧气挤不进来，靠吃落叶为生的微生物饿得睡着了——碳在黑暗里，睡得踏实。');
+    callout('🚫 一台天然的保险箱：没有氧气，微生物冬眠，分解慢了 <b>10–100 倍</b>。');
+    jParts.forEach(function(p, i){
+      setTimeout(function(){ moveP(p, rnd(180, 460), rnd(524, 566), 2000); }, i * 120);
+    });
+    fadeTo($('#j-sed2'), 1, 1600);
+    await wait(3600);
+    callout('🔎 画面里那两个发光的圈（🚫 和 🦠）藏着保险箱的秘密——去戳戳看。');
+    return;
+  }
+  if(t === 100){
+    markStep(100); jStep = 100;
+    narr('第 100 年 · 脚底下亮了——一整层<b>碳宝库</b>。一公顷的泥里，睡着一座 <b>500–1000 吨</b>的碳山，顶普通森林 <b>3–4 座</b>！');
+    callout('<span class="big">100 年 · 500–1000 吨碳 / 公顷</span><br>是普通森林的 <b>3–4 倍</b> · 泥土碳占整个生态系统的 <b>49%–98%</b>');
+    fadeTo($('#j-sed3'), 1, 1600);
+    await wait(800);
+    jParts.forEach(function(p, i){ setTimeout(function(){ moveP(p, rnd(160, 480), rnd(590, 700), 2200); }, i * 90); });
+    for(var i = 0; i < 26; i++){
+      (function(k){
+        setTimeout(function(){
+          var q = spawnP(bank, rnd(500, 1000), rnd(588, 702));
+          q.style.opacity = 0; moveP(q, rnd(500, 1000), rnd(588, 702), 1800);
+          setTimeout(function(){ q.style.opacity = 1; }, 60);
+        }, k * 90);
+      })(i);
+    }
+    fx.className = ''; fx.classList.add('glow');
+    await wait(3600);
+    narr('同样是碳，森林为什么存不住？去 <b>② 对比实验</b>比一场，答案就出来了。');
+  }
+}
+function buildJourney(){
+  setStage(mangroveScene('j'));
+  panelJourney();
+  callout('🌤️ 每一粒亮点，都是空气里的一口 CO₂。它们马上要开始一段 <b>一百年的地下旅程</b>。');
+  var skyG = $('#j-sky');
+  jParts = [];
+  for(var i = 0; i < 12; i++){
+    jParts.push(spawnP(skyG, rnd(60, 1120), rnd(50, 290)));
+  }
+  jStep = 0; markStep(0);
+  fx.className = '';
+}
+
+/* ================= ② 对比实验 ================= */
+function panelCompare(){
+  panelBody.innerHTML =
+    '<p class="narr" id="narr">同样是 10 个碳粒子，投到<b>普通森林</b>和<b>红树林</b>里，命运完全不同。按下按钮，同时投放！</p>' +
+    '<button class="btn-primary" id="cDrop">💧 同时投放 10 个碳粒子</button>' +
+    '<div id="cmpBox"></div>';
+  $('#cDrop').addEventListener('click', runCompare);
+}
+async function runCompare(){
+  if(cBusy) return;
+  cBusy = true;
+  $('#cDrop').disabled = true; $('#cDrop').textContent = '⏳ 实验进行中…';
+  $('#cmpBox').innerHTML = '';
+  var tmp = $('#cmp-tmp'), bankL = $('#cmp-bankL'), bankR = $('#cmp-bankR');
+  narr('💧 哨声一响——两边各撒下 10 粒碳。');
+  callout('🔬 一场公平的比赛。唯一的不同：<b>一边的泥晒在空气里，一边的泥泡在海水中</b>。');
+  await wait(600);
+
+  var left = [], right = [];
+  for(var i = 0; i < 10; i++){
+    left.push(spawnP(tmp, rnd(60, 540), rnd(50, 150)));
+    right.push(spawnP(tmp, rnd(660, 1140), rnd(50, 150)));
+  }
+  await wait(700);
+  narr('🌳 两边的树都把碳收下了。真正的决胜局在下一步——落叶，落在哪？');
+  left.forEach(function(p, i){ setTimeout(function(){ moveP(p, rnd(220, 380), rnd(180, 250), 1500); }, i * 90); });
+  right.forEach(function(p, i){ setTimeout(function(){ moveP(p, rnd(830, 970), rnd(180, 250), 1500); }, i * 90); });
+  await wait(2400);
+
+  narr('🍂 关键一幕：森林的落叶落在地上，四面全是氧气；红树林的落叶「扑通」一声，掉进<b>被海水泡透的泥</b>里。');
+  left.forEach(function(p, i){ setTimeout(function(){ moveP(p, rnd(140, 460), rnd(410, 440), 1600); }, i * 80); });
+  right.forEach(function(p, i){ setTimeout(function(){ moveP(p, rnd(760, 1040), rnd(470, 495), 1600); }, i * 80); });
+  await wait(2600);
+
+  narr('🦠 左边：微生物吃得正欢，落叶三两口被拆光——碳又变回 CO₂，<b>溜回天上去了</b>！');
+  left.forEach(function(p, i){
+    setTimeout(function(){
+      if(i < 7){ p.classList.add('co2'); moveP(p, rnd(60, 540), rnd(40, 130), 1900); setTimeout(function(){ p.style.opacity = .15; }, 1700); }
+      else { p.classList.add('dim'); moveP(p, rnd(160, 440), rnd(420, 452), 1200); }
+    }, i * 130);
+  });
+  await wait(2800);
+
+  narr('🚫 右边：泥里没氧气，微生物睡得正香，没谁动那粒碳——它一路下沉，<b>被锁进了深层</b>！');
+  right.forEach(function(p, i){
+    setTimeout(function(){
+      if(i < 2){ p.classList.add('co2'); moveP(p, rnd(660, 1140), rnd(40, 130), 1900); setTimeout(function(){ p.style.opacity = .15; }, 1700); }
+      else { moveP(p, rnd(700, 1140), rnd(520, 610), 2000); }
+    }, i * 130);
+  });
+  fadeTo($('#cmp-soilR'), .55, 1500);
+  await wait(3000);
+  for(var k = 0; k < 14; k++){
+    (function(n){
+      setTimeout(function(){
+        var q = spawnP(bankR, rnd(700, 1140), rnd(520, 615));
+        q.style.opacity = 0; moveP(q, rnd(700, 1140), rnd(520, 615), 1500);
+        setTimeout(function(){ q.style.opacity = 1; }, 60);
+      }, n * 80);
+    })(k);
+  }
+  await wait(2200);
+
+  narr('📊 终场哨响：<b>森林留住 3–4 粒，红树林留住 8–9 粒</b>！');
+  callout('<span class="big">红树林储碳 = 普通森林的 3–4 倍</span><br>土壤碳储量：森林 100–300 吨/公顷 · 红树林 <b>500–1000 吨/公顷</b>');
+  $('#cmpBox').innerHTML =
+    '<table class="cmp-table">' +
+    '<tr><th>对比项</th><th>普通森林</th><th>红树林</th></tr>' +
+    '<tr><td>投放碳粒子</td><td>10 个</td><td>10 个</td></tr>' +
+    '<tr><td>回到大气</td><td>6–7 个</td><td>1–2 个</td></tr>' +
+    '<tr><td>长期封存</td><td>3–4 个</td><td>8–9 个</td></tr>' +
+    '<tr><td>土壤碳储量</td><td>100–300 吨/公顷</td><td>500–1000 吨/公顷</td></tr>' +
+    '<tr><td>储碳能力</td><td>1 倍</td><td>3–4 倍</td></tr>' +
+    '</table>';
+  $('#cDrop').disabled = false; $('#cDrop').textContent = '🔁 再做一次实验';
+  cBusy = false;
+}
+function buildCompare(){
+  setStage(compareScene());
+  panelCompare();
+  callout('🔬 左边：晒着太阳的森林　右边：泡着海水的林子');
+  fx.className = '';
+}
+
+/* ================= ③ 命运的选择 ================= */
+var EMO_RE = /\p{RI}\p{RI}|\p{Emoji}(?:\uFE0F|\u200D\p{Emoji})*/u;
+function splitEmo(s){
+  var m = s.match(EMO_RE);
+  if(!m) return ['', s];
+  return ['<span class="emo">' + m[0] + '</span>', s.slice(m[0].length).replace(/^\s+/, '')];
+}
+function choicesHTML(list){
+  return '<div class="fate-choices">' + list.map(function(c, i){
+    if(c.plan){
+      return '<button class="fchoice ' + c.cls + ' plan" data-fid="' + i + '">' +
+        '<span class="ptag">方案 ' + c.plan + '</span>' +
+        '<span class="pbody">' + c.label + '<small>' + c.sub + '</small></span></button>';
+    }
+    var p = splitEmo(c.label);
+    return '<button class="fchoice ' + c.cls + '" data-fid="' + i + '">' + p[0] +
+      '<span>' + p[1] + '<small>' + c.sub + '</small></span></button>';
+  }).join('') + '</div>';
+}
+function disableChoices(){
+  $$('#panelBody .fchoice').forEach(function(b){ b.disabled = true; b.style.opacity = .5; });
+}
+function bindChoices(list){
+  $$('#panelBody .fchoice').forEach(function(b){
+    b.addEventListener('click', function(){ list[parseInt(b.dataset.fid, 10)].fn(); });
+  });
+}
+function endingBox(cls, title, rows, tail){
+  var te = splitEmo(title);
+  var h = '<div class="result ' + cls + '"><p class="tit">' + te[0] + '<span>' + te[1] + '</span></p>';
+  rows.forEach(function(r){ h += '<p>' + r + '</p>'; });
+  h += '<p style="margin-top:9px">' + tail + '</p></div>';
+  h += '<div style="margin-top:12px"><button class="btn-primary" id="fRetry">↺ 再选一次，故事会不一样</button></div>';
+  $('#fateBox').innerHTML = h;
+  $('#fRetry').addEventListener('click', function(){ fx.className = ''; buildFate(); });
+}
+function pondRow(){
+  if(fPond === 'clear')  return '💰 清退养殖塘花了 <b>3,000 万</b>，缓冲区干净了';
+  if(fPond === 'co')     return '🤝 养殖塘生态共管：废水少了一大半，村民成了编外巡护员';
+  if(fPond === 'ignore') return '⚠️ 缓冲区里的养殖塘还在排废水，碳库增长打了九折';
+  return null;
+}
+function parkRow(){
+  if(fPark === 'fee')   return '🎫 门票是稳定的收入来源（约 +1,500 万 / 10 年）';
+  if(fPark === 'free')  return '🆓 免费开放：周末的自然课堂场场坐满';
+  if(fPark === 'limit') return '📅 每天限 200 人：鸟离栈道最近只有 20 米';
+  return null;
+}
+function withChoices(rows){
+  var pr = pondRow(), kr = parkRow();
+  if(pr) rows.push(pr);
+  if(kr) rows.push(kr);
+  return rows;
+}
+
+function buildFate(){
+  setStage(mangroveScene('f'));
+  fPond = null; fPark = null;
+  fateStart();
+  fx.className = '';
+  var bank = $('#f-bank');
+  for(var i = 0; i < 42; i++){
+    var q = spawnP(bank, rnd(170, 1010), rnd(530, 706));
+    q.style.opacity = String(rnd(.55, 1));
+  }
+}
+
+/* ---------- 决定 1：砍 还是 保 ---------- */
+function fateStart(){
+  fBusy = false;
+  callout('<span class="big">地下宝库已存满 ≈ 1000 吨碳</span><br>够 200 辆汽车排上一整年 · 一存就是几百年');
+  var list = [
+    {plan:'A', cls:'danger', label:'全面开发', sub:'推平它——码头、楼盘马上开工，钱一次到手。', fn: fateCutBegin},
+    {plan:'B', cls:'mid',    label:'部分开发 · 养殖塘', sub:'砍一半挖虾塘，留一半当「绿化带」。', fn: fateHalfCut},
+    {plan:'C', cls:'safe',   label:'修复 · 湿地公园', sub:'把林子修好，请客人进来玩。', fn: fateParkBegin},
+    {plan:'D', cls:'safe',   label:'严格保护', sub:'什么都不动，把宝库原样锁好。', fn: fateKeepBegin}
+  ];
+  panelBody.innerHTML =
+    '<p class="narr" id="narr">脚底下的宝库，攒了整整 <b>1000 吨碳</b>。可宝库上头这块地，盯的人可不少——四份方案摆上了桌。<b>签字的笔，现在递到你手里：</b></p>' +
+    choicesHTML(list) +
+    '<div id="fateBox"></div>';
+  bindChoices(list);
+}
+
+/* ---------- 砍伐线：破坏动画到一半 ---------- */
+function animRotate(el, deg, dur){
+  return new Promise(function(res){
+    var steps = 24, i = 0;
+    var timer = setInterval(function(){
+      i++;
+      el.setAttribute('transform', 'rotate(' + (deg * i / steps) + ')');
+      if(i >= steps){ clearInterval(timer); res(); }
+    }, Math.max(16, dur / steps));
+  });
+}
+async function fateCutBegin(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('🏗️ 笔一落，推土机第二天就开到了。电锯的尖叫声里，没有谁低头看一眼脚下的泥。<span class="hl">地下，正出大事。</span>');
+  callout('⚠️ 轰——轰——整片滩涂都在抖。');
+  stagewrap.classList.add('shake');
+  await wait(1400);
+  stagewrap.classList.remove('shake');
+  var trunks = $$('#stage .trunkG');
+  for(var i = 0; i < trunks.length; i++){
+    (function(g, k){ setTimeout(function(){ animRotate(g, 78 + rnd(-8, 8), 900); }, k * 220); })(trunks[i], i);
+  }
+  fadeTo($('#f-water'), .12, 1500);
+  narr('🌲 树一棵接一棵地倒。铲斗挖进泥里——<span class="hl">沉睡几百年的碳，第一次见到了空气。</span>');
+  await wait(2000);
+  var tmp = $('#f-tmp');
+  for(var o = 0; o < 22; o++){
+    (function(k){
+      setTimeout(function(){
+        var c = mk('circle', {cx:0, cy:0, r:6, 'class':'o2p'}, tmp);
+        c.style.transform = 'translate(' + rnd(60, 1140) + 'px,' + rnd(40, 200) + 'px)';
+        setTimeout(function(){ c.style.transform = 'translate(' + rnd(100, 1100) + 'px,' + rnd(480, 680) + 'px)'; }, 60);
+        setTimeout(function(){ c.style.opacity = .2; }, 1300);
+      }, k * 70);
+    })(o);
+  }
+  $$('#stage .microbe').forEach(function(m){ m.classList.add('awake'); });
+  narr('💨 氧气咕嘟咕嘟灌进泥里，睡了几百年的微生物一跃而起，放开肚子大吃。<span class="hl">泥面冒起了泡——那是碳在逃命。</span>');
+  callout('💨 一个泡，就是一口逃出去的碳。<b>现在喊停，还来得及……</b>');
+  await wait(2600);
+  fBusy = false;
+  showDecision2Cut();
+}
+
+function showDecision2Cut(){
+  var list = [
+    {cls:'danger', label:'😰 继续挖完', sub:'都干到这份上了，停下就全白干了。', fn: fateContinue},
+    {cls:'mid',    label:'🐟 不挖了，改成海水鱼塘', sub:'只围水、不挖泥，损失能小一点。', fn: fateFishpond},
+    {cls:'safe',   label:'🛑 立刻停工', sub:'亏已经吃了，可底下的宝库还救得回来。', fn: fateStop}
+  ];
+  panelBody.innerHTML =
+    '<p class="narr" id="narr">铲斗停在半空。虾池图纸画好了，钱也投了一半——可泥面还在一个劲儿地冒泡。</p>' +
+    choicesHTML(list) +
+    '<div id="fateBox"></div>';
+  bindChoices(list);
+}
+
+/* ---------- 结局一：碳的灾难 ---------- */
+async function fateContinue(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('😰 你摆了摆手：继续。机器的轰鸣，盖过了泥里的冒泡声。');
+  var bank = $('#f-bank'), tmp2 = $('#f-tmp'), released = 0;
+  callout('<span class="big">💨 碳正在逃离！</span><br>已释放 CO₂ ≈ <b id="relNum">0</b> 吨 / 公顷');
+  for(var w = 0; w < 4; w++){
+    var all = Array.prototype.slice.call(bank.childNodes);
+    all.forEach(function(p, i){
+      setTimeout(function(){ moveP(p, rnd(40, 1160), rnd(20, 220), 2000); p.style.opacity = 0; }, i * 26);
+    });
+    for(var n = 0; n < 16; n++){
+      (function(k){
+        setTimeout(function(){
+          var q = spawnP(tmp2, rnd(120, 1080), rnd(470, 700), 'co2');
+          moveP(q, rnd(40, 1160), rnd(20, 200), 1900);
+          q.style.opacity = 0;
+        }, k * 55);
+      })(n);
+    }
+    released += 200;
+    var rel = $('#relNum'); if(rel) rel.textContent = released;
+    await wait(900);
+  }
+  fx.className = ''; fx.classList.add('red');
+  await wait(1200);
+  narr('💥 几百年封存的碳，在几年里逃回大气。<span class="hl">而且一旦释放，就要再等几百年才能重新封存。</span>');
+  endingBox('bad', '💥 碳的灾难', [
+    '⚠️ 破坏 1 公顷红树林 = 释放 <b>500–1000 吨碳</b>',
+    '⚠️ 相当于 <b>100–200 辆汽车</b>一年的排放',
+    '⚠️ 这些碳本来可以安全封存<b>数百年</b>',
+    '⚠️ 全球已损失 <b>35–50%</b> 的原始红树林'
+  ], '虾池是赚到钱了，可逃掉的碳，再也回不来。这是最坏的一笔账。');
+  fBusy = false;
+}
+
+/* ---------- 决定 3：停工之后怎么办 ---------- */
+async function fateStop(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('🛑 挖掘机熄了火。倒下的树横在滩涂上，泥面还在小声地冒泡。');
+  callout('⏸️ 泡声渐渐小了。可裸露的泥，还在一呼一吸地漏碳。');
+  await wait(1800);
+  fBusy = false;
+  var list = [
+    {cls:'safe',   label:'🌱 填回泥土，种回红树', sub:'花 5,000 万，等 30 年——宝库能重新存满。', fn: fateReplant},
+    {cls:'mid',    label:'🌾 填回泥土，改种便宜的芦苇', sub:'一年就绿，比红树苗便宜得多。', fn: fateReed},
+    {cls:'danger', label:'🏚️ 只停工，不填回', sub:'钱花到这儿为止，滩涂爱咋咋地。', fn: fateStopOnly}
+  ];
+  panelBody.innerHTML =
+    '<p class="narr" id="narr">停工只是踩了刹车。这片已经挖开的滩涂，接下来怎么办？</p>' +
+    choicesHTML(list) +
+    '<div id="fateBox"></div>';
+  bindChoices(list);
+}
+
+/* ---------- 决定：填土之后，树苗从哪来 ---------- */
+async function fateReplant(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('🌱 填土机开了回来。滩涂重新填上泥，海水又漫了上来——地看样子齐了，可它心里还空着。');
+  callout('🌱 填土花了 <b>3,000 万</b>。可光有泥还不够——<b>树苗从哪儿来？</b>');
+  fadeTo($('#f-water'), .8, 2000);
+  await wait(2000);
+  fBusy = false;
+  var list = [
+    {cls:'safe', label:'🌱 本地红树苗：秋茄、桐花树', sub:'一株 30 块。长得慢，可鱼蟹都认它。', fn: fateSeedLocal},
+    {cls:'mid',  label:'🌿 速生苗：无瓣海桑', sub:'一株 3 块，三年绿一大片。', fn: fateSeedFast}
+  ];
+  panelBody.innerHTML =
+    '<p class="narr" id="narr">泥土回去了。种什么树，定下这片滩涂往后三十年的模样。</p>' +
+    choicesHTML(list) +
+    '<div id="fateBox"></div>';
+  bindChoices(list);
+}
+
+function drawSeedlings(tall){
+  var svg = $('#stage svg');
+  var seedG = mk('g', {}, svg);
+  [220, 320, 420, 560, 700].forEach(function(x){
+    var g = mk('g', {'class':'seedling'}, seedG);
+    g.style.transform = 'translate(' + x + 'px,462px) scale(.22)';
+    g.style.transition = 'transform 2.5s ease';
+    g.innerHTML = tall
+      ? '<path d="M -4 0 L -3 -195" stroke="#4a6b3a" stroke-width="7" fill="none" stroke-linecap="round"/>' +
+        '<ellipse cx="-16" cy="-208" rx="20" ry="12" fill="#6f9a4e"/>' +
+        '<ellipse cx="14" cy="-218" rx="22" ry="13" fill="#7fae5a"/>' +
+        '<ellipse cx="-2" cy="-232" rx="24" ry="14" fill="#8fbf66"/>'
+      : '<path d="M -7 0 C -10 -60 -5 -120 0 -150" stroke="#5a4632" stroke-width="11" fill="none" stroke-linecap="round"/>' +
+        '<ellipse cx="-30" cy="-170" rx="42" ry="24" fill="#3e8a55"/>' +
+        '<ellipse cx="26" cy="-182" rx="46" ry="27" fill="#46a063"/>' +
+        '<ellipse cx="-2" cy="-208" rx="48" ry="28" fill="#57b573"/>';
+  });
+}
+function bankHeal(n, x1, x2){
+  var bank = $('#f-bank');
+  for(var i = 0; i < n; i++){
+    (function(k){
+      setTimeout(function(){
+        var q = spawnP(bank, rnd(x1 || 150, x2 || 760), rnd(540, 700));
+        q.style.opacity = 0; moveP(q, rnd(x1 || 150, x2 || 760), rnd(540, 700), 1600);
+        setTimeout(function(){ q.style.opacity = 1; }, 60);
+      }, k * 140);
+    })(i);
+  }
+}
+
+/* 结局：迟到的重生（本地苗） */
+async function fateSeedLocal(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('🌱 秋茄、桐花树，一株一株插回湿泥。老渔民蹲在塘边瞅了瞅：「嗯，这才是咱们的树。」');
+  callout('🌱 本地苗贵，花了 <b>1,500 万</b>——慢是慢点，鱼蟹认它。');
+  drawSeedlings(false);
+  await wait(2500);
+  narr('⏩ 时间快进：第 10 年……苗长成了小树。');
+  $$('#stage .seedling').forEach(function(g){ g.style.transform = g.style.transform.replace('scale(.22)', 'scale(.6)'); });
+  await wait(1600);
+  narr('⏩ 第 30 年……小树比当年还高了，泥土里又开始存碳。');
+  $$('#stage .seedling').forEach(function(g){ g.style.transform = g.style.transform.replace('scale(.6)', 'scale(1.02)'); });
+  bankHeal(16);
+  fx.className = ''; fx.classList.add('glow');
+  await wait(2600);
+  endingBox('good', '🌱 迟到的重生', [
+    '✅ 及时停工，约 <b>300 吨碳</b>免于全部逃逸',
+    '💸 填土加苗钱花了 <b>4,500 万</b>，虾池收入泡汤',
+    '⏳ <b>20–30 年</b>后，碳库恢复封存能力',
+    '🐟 弹涂鱼和招潮蟹最先回到滩涂'
+  ], '越早回头，代价越小。但最好的决定，是一开始就不砍。');
+  fBusy = false;
+}
+
+/* 结局：快出来的绿（速生外来苗） */
+async function fateSeedFast(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('🌿 无瓣海桑，一株 3 块钱。种植机突突开过去，一天能插几千株。');
+  callout('🌿 苗钱一共 <b>150 万</b>，绿得飞快。');
+  drawSeedlings(true);
+  await wait(2500);
+  narr('⏩ 时间快进：第 3 年……已经绿了一大片——比谁都快。');
+  $$('#stage .seedling').forEach(function(g){ g.style.transform = g.style.transform.replace('scale(.22)', 'scale(.85)'); });
+  await wait(1600);
+  narr('🦀 可蹲下来细看：滩涂上，一个螃蟹洞都没有。鸟落在枝头歇了歇脚，飞走了。');
+  bankHeal(8);
+  fx.className = ''; fx.classList.add('glow');
+  await wait(2600);
+  endingBox('mid', '🌿 快出来的绿', [
+    '💸 填土 3,000 万 + 苗钱 <b>150 万</b>，三年就绿了',
+    '🌱 固碳速度也不慢，报表上的数字挺好看',
+    '🦀 滩涂静悄悄——本地鱼蟹不认这片外来的绿',
+    '🐦 鸟站在枝头，但很少筑巢安家'
+  ], '绿得快，不等于活得好。');
+  fBusy = false;
+}
+
+/* 结局：芦苇的替班 */
+async function fateReed(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('🌾 泥填回去了。红树苗 30 块一株，芦苇苗 3 块——有人拍了板：「先种芦苇，一年就绿。」');
+  callout('🌾 第二年开春，滩涂果然绿了。只是这绿，看着有点眼生。');
+  var svg = $('#stage svg');
+  var g = mk('g', {}, svg);
+  var blades = '';
+  for(var i = 0; i < 14; i++){
+    var x = 140 + i * 62 + rnd(-12, 12);
+    blades += '<path d="M ' + x + ' 470 C ' + (x - 5) + ' 420 ' + (x + 4) + ' 385 ' + (x - 2) + ' 345" stroke="#7fa05a" stroke-width="5" fill="none" stroke-linecap="round"/>' +
+      '<path d="M ' + (x + 14) + ' 472 C ' + (x + 10) + ' 430 ' + (x + 18) + ' 400 ' + (x + 12) + ' 362" stroke="#8fae66" stroke-width="4" fill="none" stroke-linecap="round"/>';
+  }
+  g.innerHTML = blades;
+  fadeTo($('#f-water'), .8, 2000);
+  await wait(2400);
+  narr('🦀 一年过去。芦苇绿得铺天盖地，滩涂上却始终没等来一个螃蟹洞。');
+  await wait(1400);
+  endingBox('mid', '🌾 芦苇的替班', [
+    '💸 只花了 <b>800 万</b>，一年就绿了',
+    '🌱 芦苇也能固碳，但大约只有红树的一半',
+    '🌊 根系浅，大浪来的时候挡不住',
+    '🦀 弹涂鱼、招潮蟹没有回来——它们认红树'
+  ], '省下来的钱，是看不见的差距。');
+  fBusy = false;
+}
+
+/* ---------- 结局三：空白的滩涂 ---------- */
+async function fateStopOnly(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('🏚️ 钱花到这儿为止。滩涂就这么空着，泥巴晒干、裂开，像一块没人管的荒地。');
+  await wait(1800);
+  endingBox('bad', '🏚️ 空白的滩涂', [
+    '⚠️ 约 <b>300 吨碳</b>已经永久释放，找不回来',
+    '⚠️ 泥土裸露氧化，滩涂寸草不生',
+    '⚠️ 虾池停工违约，收入为 0',
+    '⚠️ 碳汇、渔业、研学的收入也全部归 0'
+  ], '钱花了，碳没了，地空着——两头落空的结局。');
+  fBusy = false;
+}
+
+/* ---------- 砍半线：只砍一半 ---------- */
+async function fateHalfCut(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('🦐 你在方案 B 上签了字：靠海的一半填掉挖虾塘，靠岸的一半留下。电锯只在一半的林子里响——听着，挺划算？');
+  callout('⚠️ 只砍一半，碳的损失可不会正好是一半……');
+  stagewrap.classList.add('shake');
+  await wait(1200);
+  stagewrap.classList.remove('shake');
+  var trunks = $$('#stage .trunkG');
+  trunks.forEach(function(g, i){
+    if(i % 2 === 0) setTimeout(function(){ animRotate(g, 78 + rnd(-8, 8), 900); }, i * 200);
+  });
+  fadeTo($('#f-water'), .4, 1500);
+  await wait(2200);
+  narr('🌲 一半的树倒了。剩下的一半站在旁边，像一本被撕掉一半的存折。');
+  callout('💨 被挖开的那一半，氧气正往泥里钻。老板摆摆手：「先这样，剩下的以后再说。」');
+  await wait(2200);
+  fBusy = false;
+  showDecision2Half();
+}
+
+function showDecision2Half(){
+  var list = [
+    {cls:'danger', label:'😤 剩下的一半也砍了', sub:'一半一半太别扭，索性砍个利索。', fn: fateContinue},
+    {cls:'mid',    label:'🚧 就到这里，剩下的不动', sub:'虾池照建，林子凑合留着。', fn: fateHalfStop},
+    {cls:'safe',   label:'🛡️ 把留下的划进保护区', sub:'立牌子、派人守，一寸不许再动。', fn: fateHalfGuard}
+  ];
+  panelBody.innerHTML =
+    '<p class="narr" id="narr">一半成了工地，一半还绿着。剩下这半片林子，怎么办？</p>' +
+    choicesHTML(list) +
+    '<div id="fateBox"></div>';
+  bindChoices(list);
+}
+
+/* 结局：半片的阴影 */
+async function fateHalfStop(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('🚧 虾池建起来了。围墙、水泵、饲料袋，紧紧挨着剩下那半片林子。');
+  callout('🚧 虾池的废水，正悄悄流进林子深处。');
+  var bank = $('#f-bank');
+  Array.prototype.slice.call(bank.childNodes).forEach(function(p, i){
+    if(i % 2 === 0) p.style.opacity = String(Math.max(.15, parseFloat(p.style.opacity || 1) * .35));
+  });
+  await wait(2600);
+  narr('📉 十年后再看：留下的那半片，绿意比从前淡了一截。');
+  await wait(800);
+  endingBox('mid', '🚧 半片的阴影', [
+    '💰 虾池收入约 <b>+1 亿</b>（10 年）',
+    '⚠️ 被砍的一半释放了约 <b>500 吨碳</b>，回不来了',
+    '📉 废水与堤坝改变水流，<b>留下的一半也在悄悄退化</b>',
+    '🐦 水鸟在变少，滩涂在变硬'
+  ], '砍一半，损失的可不止一半——剩下的那一半，也开始慢慢变暗。');
+  fBusy = false;
+}
+
+/* 结局：半个存钱罐 */
+async function fateHalfProtect(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('💼 巡护队进了场：无人机每周飞两趟，虾池被死死圈在已挖开的范围里，一寸不许多占。');
+  callout('🛡️ 剩下的一半有人守着了，地下宝库照常上班。');
+  var bank = $('#f-bank');
+  for(var i = 0; i < 8; i++){
+    (function(k){
+      setTimeout(function(){
+        var q = spawnP(bank, rnd(150, 760), rnd(540, 700));
+        q.style.opacity = 0; moveP(q, rnd(150, 760), rnd(540, 700), 1600);
+        setTimeout(function(){ q.style.opacity = 1; }, 60);
+      }, k * 160);
+    })(i);
+  }
+  fx.className = ''; fx.classList.add('glow');
+  await wait(2600);
+  endingBox('good', '🛡️ 半个存钱罐', [
+    '✅ 保住约 <b>一半</b> 碳库，每年还在继续封存',
+    '⚠️ 但被砍掉的一半，约 <b>500 吨碳</b>已经放走了',
+    '💰 虾池收入有限，保护区管理还要花钱',
+    '🐦 靠岸的林子成了水鸟最后的落脚点'
+  ], '折中救回了一半。但最好的折中，是一开始就别动手。');
+  fBusy = false;
+}
+
+/* 结局：折中的鱼塘 */
+async function fateFishpond(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('🐟 挖掘机撤了。挖开的低洼处围起塘堤，引海水进来养虾养鱼——<b>底下的泥，一铲没动</b>。');
+  callout('🐟 围水不挖泥：最深的那层土，暂时保住了。');
+  await wait(2000);
+  var bank = $('#f-bank');
+  Array.prototype.slice.call(bank.childNodes).forEach(function(p, i){
+    if(i % 3 === 0) p.style.opacity = String(Math.max(.18, parseFloat(p.style.opacity || 1) * .4));
+  });
+  narr('🧪 只是塘堤拦住了潮水——浅层碳的新口粮断了一半。废水顺着水沟，又流回了海里。');
+  await wait(1600);
+  endingBox('mid', '🐟 折中的鱼塘', [
+    '💰 养殖收入约 <b>+2,000 万</b>（10 年）',
+    '🌱 没挖透的深层土还在封存，碳库保住大半',
+    '⚠️ 潮水被拦，浅层碳的补充<b>停了一半</b>',
+    '🐦 养殖废水让附近的水鸟变少了'
+  ], '大半是保住了。可那道漏气的口子，保不齐哪天又被挖深一点。');
+  fBusy = false;
+}
+
+/* ---------- 湿地公园线 ---------- */
+async function fateParkBegin(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('🛤️ 你挑了第三条路。人们清走垃圾，补种上秋茄和桐花树，又修了一条木栈道——头几年，这里只出账、不进账。');
+  callout('🛤️ 修复三件套：清淤、补种、修栈道。先花钱，再谈钱。');
+  var svg = $('#stage svg');
+  var g = mk('g', {}, svg);
+  g.innerHTML = '<rect x="946" y="304" width="86" height="5" rx="2.5" fill="#8a6a45"/>' +
+    '<rect x="1010" y="290" width="5" height="14" fill="#8a6a45"/>' +
+    '<rect x="962" y="290" width="5" height="14" fill="#8a6a45"/>' +
+    '<text x="1048" y="298" font-size="26">🔭</text>';
+  var bank = $('#f-bank');
+  for(var i = 0; i < 10; i++){
+    (function(k){
+      setTimeout(function(){
+        var q = spawnP(bank, rnd(150, 1020), rnd(520, 706));
+        q.style.opacity = 0; moveP(q, rnd(150, 1020), rnd(520, 706), 1600);
+        setTimeout(function(){ q.style.opacity = 1; }, 60);
+      }, k * 150);
+    })(i);
+  }
+  fx.className = ''; fx.classList.add('glow');
+  await wait(2600);
+  narr('🛤️ 栈道修好了，护栏刷了新漆，导览牌也立起来了。马上开园——<b>客人怎么来？</b>');
+  fBusy = false;
+  var list = [
+    {cls:'mid',  label:'🎫 卖门票，80 元一位', sub:'来钱快，来的是举自拍杆的人。', fn: fateParkFee},
+    {cls:'safe', label:'🆓 免费开放，靠研学挣钱', sub:'不收门票，赚课程和文创——来的是背书包的孩子。', fn: fateParkFree},
+    {cls:'safe', label:'📅 预约限流，每天 200 人', sub:'人少，安静，鸟敢落在离栈道 20 米的地方。', fn: fateParkLimit}
+  ];
+  panelBody.innerHTML =
+    '<p class="narr" id="narr">公园建起来了。用什么方式开门，决定了它最后长成什么样。</p>' +
+    choicesHTML(list) +
+    '<div id="fateBox"></div>';
+  bindChoices(list);
+}
+async function fateParkFee(){
+  if(fBusy) return; fBusy = true;
+  disableChoices(); fPark = 'fee';
+  narr('🎫 售票亭立起来了。旺季一天三千人，门票成了稳定进账——人气，也是压力。');
+  callout('🎫 门票约 <b>+1,500 万</b>（10 年）。赚得快，挤得也快。');
+  await wait(2200);
+  fBusy = false;
+  showDecision2Keep('公园红火了。这片林子的名气，下一步怎么用？');
+}
+async function fateParkFree(){
+  if(fBusy) return; fBusy = true;
+  disableChoices(); fPark = 'free';
+  narr('🆓 大门敞开。周边学校的自然课搬进了滩涂，文创店的叶脉书签卖到断货。');
+  callout('🆓 来钱慢一点，可来的是一代一代的孩子。');
+  await wait(2200);
+  fBusy = false;
+  showDecision2Keep('孩子成了公园的常客。这片林子的名气，下一步怎么用？');
+}
+async function fateParkLimit(){
+  if(fBusy) return; fBusy = true;
+  disableChoices(); fPark = 'limit';
+  narr('📅 每天只放 200 人进林子，预约排到了两周后。白鹭就落在离栈道 20 米的地方，谁也不躲谁。');
+  callout('📅 门票少了，安静多了。');
+  await wait(2200);
+  fBusy = false;
+  showDecision2Keep('公园安静地火了。这片林子的名气，下一步怎么用？');
+}
+
+/* ---------- 决定：保护区谁来管 ---------- */
+async function fateHalfGuard(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('🛡️ 保护区牌子立在林子边，红字很醒目。可是牌子不会巡逻——<b>这片林子，谁来管？</b>');
+  callout('🛡️ 立牌子只要一天，守牌子要很多年。');
+  await wait(2200);
+  fBusy = false;
+  var list = [
+    {cls:'safe',   label:'💼 组专职巡护队', sub:'无人机、监测桩、两年一聘——一年 800 万。', fn: fateHalfProtect},
+    {cls:'safe',   label:'🤝 请村里人当巡护员', sub:'虾塘改生态养法，工资由保护区发。', fn: fateHalfVillage},
+    {cls:'danger', label:'🪧 只立牌子，不安排人', sub:'先应付检查，钱的事往后放。', fn: fateHalfSign}
+  ];
+  panelBody.innerHTML =
+    '<p class="narr" id="narr">牌子立好了。可牌子挡不住电鱼的船，也拦不下倒垃圾的三轮车。</p>' +
+    choicesHTML(list) +
+    '<div id="fateBox"></div>';
+  bindChoices(list);
+}
+
+/* 结局：渔民的林子（村民共管） */
+async function fateHalfVillage(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('🤝 村里的阿坤领到了红袖章。他的虾塘头一个改了生态养法——少投料，多换水。');
+  callout('🤝 工资表贴在村委会门口：巡护员一栏，全是村里人。');
+  var bank = $('#f-bank');
+  for(var i = 0; i < 10; i++){
+    (function(k){
+      setTimeout(function(){
+        var q = spawnP(bank, rnd(150, 760), rnd(540, 700));
+        q.style.opacity = 0; moveP(q, rnd(150, 760), rnd(540, 700), 1600);
+        setTimeout(function(){ q.style.opacity = 1; }, 60);
+      }, k * 150);
+    })(i);
+  }
+  fx.className = ''; fx.classList.add('glow');
+  await wait(2600);
+  narr('🦐 一年后：虾长得慢了一点，药钱省了一大笔。隔壁塘主看了半年，也跟着改了。');
+  await wait(1400);
+  endingBox('good', '🤝 渔民的林子', [
+    '✅ 保住约 <b>一半</b> 碳库，每年还在继续封存',
+    '💰 管护费省下一大半，村民多了新收入',
+    '🦐 虾塘改生态养法，废水少了一大半',
+    '🚫 偷猎、倒垃圾——村里人自己就管住了'
+  ], '最好的围栏，不是铁丝网，是人心。');
+  fBusy = false;
+}
+
+/* 结局：挂牌的保护（只立牌子） */
+async function fateHalfSign(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('🪧 牌子立好了。然后——就没有然后了。');
+  callout('🪧 「挂牌保护」，等于保护吗？');
+  var bank = $('#f-bank');
+  Array.prototype.slice.call(bank.childNodes).forEach(function(p, i){
+    if(i % 2 === 1) p.style.opacity = String(Math.max(.12, parseFloat(p.style.opacity || 1) * .3));
+  });
+  await wait(2600);
+  narr('📉 一年后再看：牌子歪了。林子里多了电鱼的船，和倒垃圾的三轮车。');
+  await wait(1200);
+  endingBox('bad', '🪧 挂牌的保护', [
+    '⚠️ 没人巡护：电鱼、盗猎、倒垃圾照旧',
+    '⚠️ 剩下的一半林子，也在悄悄漏碳',
+    '💰 牌子花了 8 万，管护花了 0 元',
+    '🐦 水鸟越来越少，最后连牌子也锈了'
+  ], '一块牌子，护不住一片林子。');
+  fBusy = false;
+}
+
+/* ---------- 保护线 ---------- */
+async function fateKeepBegin(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('🛡️ 你在方案 D 上画了个圈。林子照旧长它的树、存它的碳，什么也不会被打扰。');
+  callout('🌿 没有轰鸣，没有铲斗。潮水每天来两次，碳每天沉一层。');
+  var skyG = $('#f-sky'), bank = $('#f-bank');
+  for(var i = 0; i < 10; i++){
+    (function(k){
+      setTimeout(function(){
+        var p = spawnP(skyG, rnd(120, 1080), rnd(40, 200));
+        setTimeout(function(){ moveP(p, rnd(190, 430), rnd(240, 290), 1700); }, 150);
+        setTimeout(function(){ moveP(p, rnd(150, 500), rnd(520, 690), 2400); }, 2200);
+      }, k * 380);
+    })(i);
+  }
+  await wait(2600);
+  narr('📋 保护区成立那天，一个躲不开的问题摆上了桌：<b>缓冲区里，村民养了几十年的虾塘怎么办？</b>');
+  fBusy = false;
+  var list = [
+    {cls:'safe',   label:'💰 出钱清退，塘一口口收回', sub:'补偿金一次付清，共 3,000 万。', fn: fatePondClear},
+    {cls:'mid',    label:'🤝 留下塘，共管改生态养法', sub:'不花大钱，可要一口塘一口塘地磨。', fn: fatePondCo},
+    {cls:'danger', label:'😑 先划进去再说', sub:'红线先画了，塘的事往后放放。', fn: fatePondIgnore}
+  ];
+  panelBody.innerHTML =
+    '<p class="narr" id="narr">界碑立好了。可界碑里头，还有十几口养了几十年的虾塘——塘里连着十几户人家的生计。</p>' +
+    choicesHTML(list) +
+    '<div id="fateBox"></div>';
+  bindChoices(list);
+}
+async function fatePondClear(){
+  if(fBusy) return; fBusy = true;
+  disableChoices(); fPond = 'clear';
+  narr('💰 补偿金付清了。挖掘机把塘堤一口口推平，潮水重新灌满缓冲区。');
+  callout('💰 花了 <b>3,000 万</b>，买回一整片干净的滩涂。');
+  bankHeal(8);
+  await wait(2400);
+  fBusy = false;
+  showDecision2Keep('缓冲区干净了。这时有人提议：林子这么有名，是不是可以搞点旅游？');
+}
+async function fatePondCo(){
+  if(fBusy) return; fBusy = true;
+  disableChoices(); fPond = 'co';
+  narr('🤝 一口塘一口塘地谈。生态养法：少投料、不投药，塘边再补一排红树苗。');
+  callout('🤝 磨了整整一年，签下共管协议的塘占到了七成。');
+  await wait(2400);
+  fBusy = false;
+  showDecision2Keep('塘稳住了，跟村民的关系也稳住了。这时有人提议：是不是可以搞点旅游？');
+}
+async function fatePondIgnore(){
+  if(fBusy) return; fBusy = true;
+  disableChoices(); fPond = 'ignore';
+  narr('😑 塘还在，废水还在半夜排。巡护员缺编，这事被写进了「遗留问题」那一栏。');
+  callout('⚠️ 划进保护区的塘，不会自己变成滩涂。');
+  var bank = $('#f-bank');
+  Array.prototype.slice.call(bank.childNodes).forEach(function(p, i){
+    if(i % 4 === 0) p.style.opacity = String(Math.max(.2, parseFloat(p.style.opacity || 1) * .45));
+  });
+  await wait(2400);
+  fBusy = false;
+  showDecision2Keep('问题被放进了「以后」。这时有人提议：是不是可以搞点旅游？');
+}
+
+function showDecision2Keep(narrText){
+  var list = [
+    {cls:'danger', label:'🏨 大建酒店和观景栈道', sub:'游客翻倍，进账翻倍——只是人多，鸟就少。', fn: fateBigBuild},
+    {cls:'safe',   label:'🛤️ 只建小木栈道', sub:'预约制、限人流，慢慢来。', fn: fateEco},
+    {cls:'safe',   label:'💨 开发碳汇，卖进碳市场', sub:'一砖一瓦都不建，把泥里封的碳变成钱。', fn: fateCarbon},
+    {cls:'mid',    label:'🌾 什么都不建', sub:'让它安安静静地长，钱的事以后再说。', fn: fateWild}
+  ];
+  panelBody.innerHTML =
+    '<p class="narr" id="narr">' + (narrText || '保护区旁边正好有一块空地。这片林子带来的名气，要怎么用？') + '</p>' +
+    choicesHTML(list) +
+    '<div id="fateBox"></div>';
+  bindChoices(list);
+}
+
+/* ---------- 结局四：甜蜜的负担 ---------- */
+async function fateBigBuild(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('🏨 酒店和玻璃栈道一年建成。游客乌泱泱地来了——<span class="hl">鸟，却一只一只地少了。</span>');
+  var svg = $('#stage svg');
+  var g = mk('g', {}, svg);
+  g.innerHTML = '<text x="1075" y="330" font-size="40">🏨</text>' +
+    '<text x="1128" y="292" font-size="34">🏨</text>' +
+    '<text x="1028" y="292" font-size="30">🎡</text>';
+  var bank = $('#f-bank');
+  Array.prototype.slice.call(bank.childNodes).forEach(function(p){
+    p.style.opacity = String(Math.max(.22, parseFloat(p.style.opacity || 1) * .55));
+  });
+  callout('📉 脚步踩实滩涂，灯光惊走夜鸟：碳库增长<b>减半</b>（每年约 0.7–1 吨/公顷）。');
+  await wait(2800);
+  endingBox('mid', '🏨 甜蜜的负担', withChoices([
+    '💰 旅游收入约 <b>+1.2 亿</b>（10 年）',
+    '🐦 灯光与人流惊扰，<b>候鸟少了一大半</b>',
+    '📉 滩涂被踩实，碳库增长<b>减半</b>（每年约 0.7–1 吨/公顷）',
+    '🦐 附近的渔业和养殖也没有起色'
+  ]), '账面赚钱了。可这片林子最值钱的东西，正在悄悄变少。');
+  fBusy = false;
+}
+
+/* ---------- 结局五：双赢 ---------- */
+async function fateEco(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('🛤️ 一条小木栈道弯弯地伸进林子。每天限 200 人，全部预约。');
+  var svg = $('#stage svg');
+  var g = mk('g', {}, svg);
+  g.innerHTML = '<text x="1060" y="300" font-size="30">🔭</text>' +
+    '<text x="1000" y="322" font-size="26">🥾</text>' +
+    '<rect x="940" y="306" width="52" height="5" rx="2.5" fill="#8a6a45"/>';
+  var bank = $('#f-bank');
+  for(var i = 0; i < 12; i++){
+    (function(k){
+      setTimeout(function(){
+        var q = spawnP(bank, rnd(150, 1020), rnd(520, 706));
+        q.style.opacity = 0; moveP(q, rnd(150, 1020), rnd(520, 706), 1600);
+        setTimeout(function(){ q.style.opacity = 1; }, 60);
+      }, k * 120);
+    })(i);
+  }
+  fx.className = ''; fx.classList.add('glow');
+  callout('🎓 来研学的孩子，把蓝碳的故事讲给了更多人听。');
+  await wait(2800);
+  endingBox('good', '🌿 双赢', withChoices([
+    '💰 研学与门票约 <b>+3,000 万</b>（10 年）',
+    '🌱 碳库每年继续封存 <b>1.5–2 吨/公顷</b>',
+    '🦅 <b>262 种鸟类</b>都还在，黑脸琵鹭准时到访',
+    '🎓 研学课程成了周边学校的固定项目'
+  ]), '克制，是最高级的开发——钱赚了，鸟没走，碳还在长。');
+  fBusy = false;
+}
+
+/* 结局：会呼吸的存折 */
+async function fateCarbon(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('💨 不建酒店，不修栈道。请来评估机构，把每年封下来的碳做成「碳汇」，卖给想抵掉自己排放的企业。');
+  callout('💨 2023 年全国首单：红树林碳汇拍出 <b>485 元/吨</b>。');
+  var bank = $('#f-bank');
+  for(var i = 0; i < 14; i++){
+    (function(k){
+      setTimeout(function(){
+        var q = spawnP(bank, rnd(150, 1020), rnd(520, 706));
+        q.style.opacity = 0; moveP(q, rnd(150, 1020), rnd(520, 706), 1600);
+        setTimeout(function(){ q.style.opacity = 1; }, 60);
+      }, k * 120);
+    })(i);
+  }
+  var svg = $('#stage svg');
+  var g = mk('g', {}, svg);
+  g.innerHTML = '<text x="1020" y="332" font-size="34">🏷️</text>' +
+    '<text x="1072" y="300" font-size="30">💰</text>';
+  fx.className = ''; fx.classList.add('glow');
+  await wait(2800);
+  narr('💼 拍卖槌「咚」地落下。这笔钱付了巡护员的工资、清了海漂垃圾——树，一棵都没砍。');
+  await wait(1600);
+  endingBox('good', '💨 会呼吸的存折', withChoices([
+    '💰 <b>3,875 吨</b>碳汇拍出 <b>187 万元</b>（2023 年全国首单）',
+    '💼 卖碳的钱付巡护员工资、清理海漂垃圾',
+    '🌱 树一棵没砍，碳库越存越厚',
+    '🦅 <b>262 种鸟类</b>照常安家，黑脸琵鹭准时到访'
+  ]), '林子站着不动也能挣钱——它每吸一口碳，这本存折就厚一分。');
+  fBusy = false;
+}
+
+/* ---------- 结局六：沉睡的宝藏 ---------- */
+async function fateWild(){
+  if(fBusy) return; fBusy = true;
+  disableChoices();
+  narr('🌾 你什么都没批。滩涂安安静静，一天只有两回潮声。');
+  callout('🌙 没有游客，没有门票——只有林子在悄悄上班。');
+  var bank = $('#f-bank');
+  for(var i = 0; i < 10; i++){
+    (function(k){
+      setTimeout(function(){
+        var q = spawnP(bank, rnd(150, 1020), rnd(520, 706));
+        q.style.opacity = 0; moveP(q, rnd(150, 1020), rnd(520, 706), 1600);
+        setTimeout(function(){ q.style.opacity = 1; }, 60);
+      }, k * 140);
+    })(i);
+  }
+  fx.className = ''; fx.classList.add('glow');
+  await wait(2800);
+  endingBox('good', '🌙 沉睡的宝藏', withChoices([
+    '🌱 碳库每年封存 <b>1.5–2 吨/公顷</b>，无人打扰',
+    '🐦 <b>262 种鸟类</b>安家，黑脸琵鹭年年回来',
+    '💰 公园之外没有新收入，管护还要花钱',
+    '🌊 台风来的时候，是这片林子在替城市挡浪'
+  ]), '有些价值写不进账本——比如安静，比如等待。');
+  fBusy = false;
+}
+
+/* ================= 章节切换 ================= */
+var builders = [buildJourney, buildCompare, buildFate];
+function showChapter(i){
+  if(i === CH && stage.innerHTML) return;
+  CH = i;
+  $$('.tab').forEach(function(t, k){ t.classList.toggle('on', k === i); });
+  builders[i]();
+}
+$$('.tab').forEach(function(t){
+  t.addEventListener('click', function(){ showChapter(parseInt(t.dataset.ch, 10)); });
+});
+$('#startBtn').addEventListener('click', function(){
+  $('#intro').classList.add('gone');
+  setTimeout(function(){ $('#intro').remove(); }, 900);
+});
+
+/* 初始 */
+buildJourney();
+</script>
+</body>
+</html>
