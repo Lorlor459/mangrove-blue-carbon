@@ -56,8 +56,7 @@
   .hotspot{cursor:pointer}
   .hot-c{fill:rgba(255,176,58,.28);stroke:rgba(255,214,130,.85);stroke-width:1.5;animation:pulse 2.2s ease-in-out infinite}
   @keyframes pulse{0%,100%{r:23;opacity:.7}50%{r:28;opacity:1}}
-  .hicon path,.hicon circle,.hicon line,.hicon rect{stroke:#17302a;stroke-width:2.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
-  .hicon .fill{fill:#17302a;stroke:none}
+  .hicon{stroke-linecap:round;stroke-linejoin:round}
   .dicon path,.dicon circle,.dicon line,.dicon rect{stroke:#17302a;stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
   .dicon .fill{fill:#17302a;stroke:none}
   .microbe path{stroke:#cbbd97;stroke-width:2.4;fill:none;stroke-linecap:round;animation:wig 2.6s ease-in-out infinite}
@@ -273,19 +272,49 @@ function treeSVG(){
     '</g></g>';
 }
 var HOT_ICONS = {
-  tide:    '<path d="M -9 -3 q 4.5 -5 9 0 q 4.5 5 9 0"/><path d="M -9 4 q 4.5 -5 9 0 q 4.5 5 9 0"/>',
-  breath:  '<line x1="-7" y1="8" x2="-7" y2="-3"/><line x1="0" y1="8" x2="0" y2="-6"/><line x1="7" y1="8" x2="7" y2="-1"/>' +
-           '<circle class="fill" cx="-7" cy="-6" r="1.7"/><circle class="fill" cx="0" cy="-9" r="1.7"/><circle class="fill" cx="7" cy="-4" r="1.7"/>',
-  roots:   '<line x1="0" y1="9" x2="0" y2="1"/><path d="M 0 1 C -1 -5 -5 -8 -9 -9"/><path d="M 0 1 C 1 -5 5 -8 9 -9"/>',
-  anchor:  '<circle cx="0" cy="-8" r="3.2"/><line x1="0" y1="-5" x2="0" y2="9"/><line x1="-6" y1="-2" x2="6" y2="-2"/>' +
-           '<path d="M -9 3 C -9 9 -4 11 0 11 C 4 11 9 9 9 3"/>',
-  soil:    '<circle class="fill" cx="-5" cy="-4" r="1.9"/><circle class="fill" cx="4" cy="-1" r="1.9"/>' +
-           '<circle class="fill" cx="-3" cy="4" r="1.9"/><circle class="fill" cx="6" cy="-7" r="1.9"/><circle class="fill" cx="1" cy="8" r="1.9"/>',
-  hypoxia: '<circle cx="0" cy="0" r="9"/><line x1="-6.4" y1="6.4" x2="6.4" y2="-6.4"/>',
-  microbe: '<circle cx="0" cy="0" r="6.2"/><line x1="-5.5" y1="-5.5" x2="-9" y2="-9"/><line x1="5.5" y1="-5.5" x2="9" y2="-9"/>' +
-           '<line x1="-5.5" y1="5.5" x2="-9" y2="9"/><line x1="5.5" y1="5.5" x2="9" y2="9"/>' +
-           '<line x1="-9.5" y1="0" x2="-12" y2="0"/><line x1="9.5" y1="0" x2="12" y2="0"/>',
-  coast:   '<path d="M -8 9 L -8 -1 L 0 -8 L 8 -1 L 8 9 Z"/><rect class="fill" x="-2.6" y="2.5" width="5.2" height="6.5"/>'
+  tide:
+    '<path d="M -11 -4 q 5.5 -6 11 0 q 5.5 6 11 0 v 6 q -5.5 6 -11 0 q -5.5 -6 -11 0 Z" fill="#4a9a8e"/>' +
+    '<path d="M -11 3 q 5.5 -6 11 0 q 5.5 6 11 0 v 6 q -5.5 6 -11 0 q -5.5 -6 -11 0 Z" fill="#7fc7de"/>',
+  breath:
+    '<path d="M -11 11 q 11 4 22 0 l 0 -3 q -11 -4 -22 0 Z" fill="#5e4a33"/>' +
+    '<path d="M -6 8 C -7 2 -6 -3 -4 -7" stroke="#57b573" stroke-width="3"/>' +
+    '<path d="M 1 8 C 1 0 1 -6 1 -10" stroke="#3e8a55" stroke-width="3"/>' +
+    '<path d="M 8 8 C 9 3 9 -1 7 -5" stroke="#57b573" stroke-width="3"/>' +
+    '<circle cx="-4" cy="-9" r="2.2" fill="#57b573"/><circle cx="1" cy="-12" r="2.2" fill="#3e8a55"/><circle cx="7" cy="-7" r="2.2" fill="#57b573"/>',
+  roots:
+    '<path d="M 0 11 C 0 6 0 2 0 -2" stroke="#4c3a29" stroke-width="3.2"/>' +
+    '<ellipse cx="-6.5" cy="-5" rx="6" ry="3.6" fill="#57b573" transform="rotate(-28 -6.5 -5)"/>' +
+    '<ellipse cx="6.5" cy="-7.5" rx="6" ry="3.6" fill="#2f7d5c" transform="rotate(24 6.5 -7.5)"/>' +
+    '<path d="M -6 11 q 3 -3 6 0 q 3 3 6 0" stroke="#5e4a33" stroke-width="2.6"/>',
+  anchor:
+    '<path d="M 0 -11 C -2 -4 -8 1 -11 9" stroke="#5a4632" stroke-width="3.4"/>' +
+    '<path d="M 0 -11 C 2 -4 8 1 11 9" stroke="#5a4632" stroke-width="3.4"/>' +
+    '<path d="M 0 -11 C 0 -4 0 3 0 9" stroke="#4c3a29" stroke-width="3.4"/>' +
+    '<ellipse cx="0" cy="10" rx="8" ry="3.2" fill="#5e4a33"/>' +
+    '<circle cx="-4" cy="9.5" r="1.4" fill="#ffb03a"/><circle cx="4" cy="10" r="1.4" fill="#ffb03a"/>',
+  soil:
+    '<circle r="11" fill="#5e4a33"/>' +
+    '<path d="M -11 -3.5 h 22" stroke="#4a3726" stroke-width="3.6"/>' +
+    '<path d="M -11 3.5 h 22" stroke="#332619" stroke-width="3.6"/>' +
+    '<circle cx="-4.5" cy="0" r="2" fill="#ffb03a"/><circle cx="5" cy="-7.5" r="1.7" fill="#ffb03a"/><circle cx="4.5" cy="7.5" r="1.7" fill="#ffb03a"/>',
+  hypoxia:
+    '<circle r="10.5" fill="#fdfaf2"/>' +
+    '<circle r="9" fill="none" stroke="#c14e38" stroke-width="4"/>' +
+    '<line x1="-6.3" y1="6.3" x2="6.3" y2="-6.3" stroke="#c14e38" stroke-width="4"/>',
+  microbe:
+    '<circle r="8" fill="#57b573"/>' +
+    '<circle cx="-2.8" cy="-2.2" r="1.8" fill="#2f7d5c"/><circle cx="3.2" cy="2.6" r="1.4" fill="#2f7d5c"/>' +
+    '<line x1="-6" y1="-6" x2="-9.5" y2="-9.5" stroke="#2f7d5c" stroke-width="2.4"/>' +
+    '<line x1="6" y1="-6" x2="9.5" y2="-9.5" stroke="#2f7d5c" stroke-width="2.4"/>' +
+    '<line x1="-6.5" y1="6" x2="-10" y2="9" stroke="#2f7d5c" stroke-width="2.4"/>' +
+    '<line x1="6.5" y1="6" x2="10" y2="9" stroke="#2f7d5c" stroke-width="2.4"/>' +
+    '<line x1="-10" y1="0" x2="-13" y2="0" stroke="#2f7d5c" stroke-width="2.4"/>' +
+    '<line x1="10" y1="0" x2="13" y2="0" stroke="#2f7d5c" stroke-width="2.4"/>',
+  coast:
+    '<rect x="-8.5" y="-1" width="17" height="11" fill="#f6f1e5" stroke="#17302a" stroke-width="1.6"/>' +
+    '<path d="M -10.5 -1 L 0 -10.5 L 10.5 -1 Z" fill="#c14e38" stroke="#17302a" stroke-width="1.4"/>' +
+    '<rect x="-2.6" y="3.2" width="5.2" height="6.8" fill="#5a4632"/>' +
+    '<rect x="4" y="1.6" width="3.6" height="3.6" fill="#ffb03a"/>'
 };
 function hotspotsSVG(){
   var hs = [['tide',760,352],['breath',560,450],['roots',330,545],
@@ -293,7 +322,9 @@ function hotspotsSVG(){
             ['microbe',418,602],['coast',1102,418]];
   return '<g>' + hs.map(function(h){
     return '<g class="hotspot" data-egg="' + h[0] + '" transform="translate(' + h[1] + ',' + h[2] + ')">' +
-      '<circle r="23" class="hot-c"/><g class="hicon">' + HOT_ICONS[h[0]] + '</g></g>';
+      '<circle r="23" class="hot-c"/>' +
+      '<circle r="17.5" fill="#f6f1e5" opacity=".95"/>' +
+      '<g class="hicon" fill="none" stroke="#17302a" stroke-width="2.8">' + HOT_ICONS[h[0]] + '</g></g>';
   }).join('') + '</g>';
 }
 function mangroveScene(id, opts){
