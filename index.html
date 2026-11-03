@@ -111,6 +111,16 @@
   .result.bad .tit{color:var(--coral)} .result.good .tit{color:var(--green)}
   .result.mid{background:#fbf3dd;border:1px solid rgba(214,158,58,.5)}
   .result.mid .tit{color:#a06b12}
+  .ledger{margin:10px 0 2px}
+  .ledger .lblock{border-radius:11px;padding:9px 13px 8px;margin-bottom:9px;background:rgba(255,255,255,.62)}
+  .ledger .lblock.pro{border-left:4px solid var(--green)}
+  .ledger .lblock.con{border-left:4px solid var(--coral)}
+  .ledger .lh{font-weight:700;font-size:14px;letter-spacing:.05em;margin-bottom:4px}
+  .ledger .pro .lh{color:#1d6a48}
+  .ledger .con .lh{color:#a03a22}
+  .ledger p{margin-bottom:5px}
+  .ledger .lblock p:last-child{margin-bottom:0}
+  .ledger .lnone{color:#8b8577;font-size:13.5px}
   .cmp-table{width:100%;border-collapse:collapse;font-size:13.5px;animation:fadein .6s;background:#fff;border-radius:13px;overflow:hidden;box-shadow:0 8px 20px -14px rgba(0,0,0,.35)}
   .cmp-table th,.cmp-table td{padding:8px 9px;text-align:center;border-bottom:1px solid rgba(23,48,42,.09)}
   .cmp-table th{background:var(--deep);color:#ffe9bd;font-weight:600;font-size:13px}
@@ -687,10 +697,17 @@ function bindChoices(list){
     b.addEventListener('click', function(){ list[parseInt(b.dataset.fid, 10)].fn(); });
   });
 }
-function endingBox(cls, title, rows, tail){
+function endingBox(cls, title, pros, cons, tail){
   var te = splitEmo(title);
   var h = '<div class="result ' + cls + '"><p class="tit">' + te[0] + '<span>' + te[1] + '</span></p>';
-  rows.forEach(function(r){ h += '<p>' + r + '</p>'; });
+  h += '<div class="ledger">';
+  h += '<div class="lblock pro"><p class="lh">✅ 积极的一面 · 得到了什么</p>';
+  if(pros.length){ pros.forEach(function(r){ h += '<p>' + r + '</p>'; }); }
+  else { h += '<p class="lnone">这一局，几乎没有赢到任何东西。</p>'; }
+  h += '</div><div class="lblock con"><p class="lh">⚠️ 消极的一面 · 失去了什么</p>';
+  if(cons.length){ cons.forEach(function(r){ h += '<p>' + r + '</p>'; }); }
+  else { h += '<p class="lnone">几乎没付出什么代价——这是最稳的一步棋。</p>'; }
+  h += '</div></div>';
   h += '<p style="margin-top:9px">' + tail + '</p></div>';
   h += '<div style="margin-top:12px"><button class="btn-primary" id="fRetry">↺ 再选一次，故事会不一样</button></div>';
   $('#fateBox').innerHTML = h;
@@ -708,11 +725,11 @@ function parkRow(){
   if(fPark === 'limit') return '📅 每天限 200 人：鸟离栈道最近只有 20 米';
   return null;
 }
-function withChoices(rows){
+function withChoices(pros, cons){
   var pr = pondRow(), kr = parkRow();
-  if(pr) rows.push(pr);
-  if(kr) rows.push(kr);
-  return rows;
+  if(pr){ (fPond === 'ignore' ? cons : pros).push(pr); }
+  if(kr){ pros.push(kr); }
+  return [pros, cons];
 }
 
 function buildFate(){
@@ -830,12 +847,13 @@ async function fateContinue(){
   fx.className = ''; fx.classList.add('red');
   await wait(1200);
   narr('💥 几百年封存的碳，在几年里逃回大气。<span class="hl">而且一旦释放，就要再等几百年才能重新封存。</span>');
-  endingBox('bad', '💥 碳的灾难', [
+  endingBox('bad', '💥 碳的灾难', [],
+    [
     '⚠️ 破坏 1 公顷红树林 = 释放 <b>500–1000 吨碳</b>',
-    '⚠️ 相当于 <b>100–200 辆汽车</b>一年的排放',
-    '⚠️ 这些碳本来可以安全封存<b>数百年</b>',
-    '⚠️ 全球已损失 <b>35–50%</b> 的原始红树林'
-  ], '虾池是赚到钱了，可逃掉的碳，再也回不来。这是最坏的一笔账。');
+    '⚠️ 相当于 <b>100–200 辆汽车</b>一整年的排放',
+    '⚠️ 本可安全封存<b>数百年</b>的碳，几年内全部逃逸',
+    '⚠️ 全球已损失 <b>35–50%</b> 的原始红树林——这是最糟的一步棋'
+    ], '虾池是赚到钱了，可逃掉的碳，再也回不来。这是最坏的一笔账。');
   fBusy = false;
 }
 
@@ -926,12 +944,17 @@ async function fateSeedLocal(){
   bankHeal(16);
   fx.className = ''; fx.classList.add('glow');
   await wait(2600);
-  endingBox('good', '🌱 迟到的重生', [
+  endingBox('good', '🌱 迟到的重生',
+    [
     '✅ 及时停工，约 <b>300 吨碳</b>免于全部逃逸',
-    '💸 填土加苗钱花了 <b>4,500 万</b>，虾池收入泡汤',
     '⏳ <b>20–30 年</b>后，碳库恢复封存能力',
     '🐟 弹涂鱼和招潮蟹最先回到滩涂'
-  ], '越早回头，代价越小。但最好的决定，是一开始就不砍。');
+    ],
+    [
+    '💸 填土加苗钱花了 <b>4,500 万</b>',
+    '🦐 虾池收入泡汤，前期投入全打了水漂',
+    '⏳ 恢复的 20–30 年里，这片滩涂只出不进'
+    ], '越早回头，代价越小。但最好的决定，是一开始就不砍。');
   fBusy = false;
 }
 
@@ -950,12 +973,16 @@ async function fateSeedFast(){
   bankHeal(8);
   fx.className = ''; fx.classList.add('glow');
   await wait(2600);
-  endingBox('mid', '🌿 快出来的绿', [
-    '💸 填土 3,000 万 + 苗钱 <b>150 万</b>，三年就绿了',
-    '🌱 固碳速度也不慢，报表上的数字挺好看',
+  endingBox('mid', '🌿 快出来的绿',
+    [
+    '💸 苗钱只花 <b>150 万</b>，是本地苗的零头',
+    '🌱 固碳速度不慢，<b>三年</b>就绿一大片，报表很好看'
+    ],
+    [
+    '💸 填土还是花了 <b>3,000 万</b>',
     '🦀 滩涂静悄悄——本地鱼蟹不认这片外来的绿',
-    '🐦 鸟站在枝头，但很少筑巢安家'
-  ], '绿得快，不等于活得好。');
+    '🐦 鸟会落在枝头歇脚，但很少筑巢安家'
+    ], '绿得快，不等于活得好。');
   fBusy = false;
 }
 
@@ -978,12 +1005,16 @@ async function fateReed(){
   await wait(2400);
   narr('🦀 一年过去。芦苇绿得铺天盖地，滩涂上却始终没等来一个螃蟹洞。');
   await wait(1400);
-  endingBox('mid', '🌾 芦苇的替班', [
-    '💸 只花了 <b>800 万</b>，一年就绿了',
-    '🌱 芦苇也能固碳，但大约只有红树的一半',
+  endingBox('mid', '🌾 芦苇的替班',
+    [
+    '💸 只花了 <b>800 万</b>，一年就绿',
+    '🌱 芦苇也能固碳，滩涂不再是光板'
+    ],
+    [
+    '🌱 固碳只有红树的<b>一半左右</b>，越到后头差距越大',
     '🌊 根系浅，大浪来的时候挡不住',
-    '🦀 弹涂鱼、招潮蟹没有回来——它们认红树'
-  ], '省下来的钱，是看不见的差距。');
+    '🦀 弹涂鱼、招潮蟹没有回来——它们只认红树'
+    ], '省下来的钱，是看不见的差距。');
   fBusy = false;
 }
 
@@ -993,12 +1024,13 @@ async function fateStopOnly(){
   disableChoices();
   narr('🏚️ 钱花到这儿为止。滩涂就这么空着，泥巴晒干、裂开，像一块没人管的荒地。');
   await wait(1800);
-  endingBox('bad', '🏚️ 空白的滩涂', [
+  endingBox('bad', '🏚️ 空白的滩涂', [],
+    [
     '⚠️ 约 <b>300 吨碳</b>已经永久释放，找不回来',
     '⚠️ 泥土裸露氧化，滩涂寸草不生',
     '⚠️ 虾池停工违约，收入为 0',
     '⚠️ 碳汇、渔业、研学的收入也全部归 0'
-  ], '钱花了，碳没了，地空着——两头落空的结局。');
+    ], '钱花了，碳没了，地空着——两头落空的结局。');
   fBusy = false;
 }
 
@@ -1050,12 +1082,15 @@ async function fateHalfStop(){
   await wait(2600);
   narr('📉 十年后再看：留下的那半片，绿意比从前淡了一截。');
   await wait(800);
-  endingBox('mid', '🚧 半片的阴影', [
-    '💰 虾池收入约 <b>+1 亿</b>（10 年）',
+  endingBox('mid', '🚧 半片的阴影',
+    [
+    '💰 虾池收入约 <b>+1 亿</b>（10 年）'
+    ],
+    [
     '⚠️ 被砍的一半释放了约 <b>500 吨碳</b>，回不来了',
     '📉 废水与堤坝改变水流，<b>留下的一半也在悄悄退化</b>',
     '🐦 水鸟在变少，滩涂在变硬'
-  ], '砍一半，损失的可不止一半——剩下的那一半，也开始慢慢变暗。');
+    ], '砍一半，损失的可不止一半——剩下的那一半，也开始慢慢变暗。');
   fBusy = false;
 }
 
@@ -1077,12 +1112,15 @@ async function fateHalfProtect(){
   }
   fx.className = ''; fx.classList.add('glow');
   await wait(2600);
-  endingBox('good', '🛡️ 半个存钱罐', [
+  endingBox('good', '🛡️ 半个存钱罐',
+    [
     '✅ 保住约 <b>一半</b> 碳库，每年还在继续封存',
-    '⚠️ 但被砍掉的一半，约 <b>500 吨碳</b>已经放走了',
-    '💰 虾池收入有限，保护区管理还要花钱',
     '🐦 靠岸的林子成了水鸟最后的落脚点'
-  ], '折中救回了一半。但最好的折中，是一开始就别动手。');
+    ],
+    [
+    '⚠️ 被砍掉的一半，约 <b>500 吨碳</b>已经放走，无法挽回',
+    '💰 虾池收入有限，保护区管理还要年年花钱'
+    ], '折中救回了一半。但最好的折中，是一开始就别动手。');
   fBusy = false;
 }
 
@@ -1099,12 +1137,15 @@ async function fateFishpond(){
   });
   narr('🧪 只是塘堤拦住了潮水——浅层碳的新口粮断了一半。废水顺着水沟，又流回了海里。');
   await wait(1600);
-  endingBox('mid', '🐟 折中的鱼塘', [
+  endingBox('mid', '🐟 折中的鱼塘',
+    [
     '💰 养殖收入约 <b>+2,000 万</b>（10 年）',
-    '🌱 没挖透的深层土还在封存，碳库保住大半',
+    '🌱 没挖透的深层土还在封存，碳库保住大半'
+    ],
+    [
     '⚠️ 潮水被拦，浅层碳的补充<b>停了一半</b>',
     '🐦 养殖废水让附近的水鸟变少了'
-  ], '大半是保住了。可那道漏气的口子，保不齐哪天又被挖深一点。');
+    ], '大半是保住了。可那道漏气的口子，保不齐哪天又被挖深一点。');
   fBusy = false;
 }
 
@@ -1217,12 +1258,16 @@ async function fateHalfVillage(){
   await wait(2600);
   narr('🦐 一年后：虾长得慢了一点，药钱省了一大笔。隔壁塘主看了半年，也跟着改了。');
   await wait(1400);
-  endingBox('good', '🤝 渔民的林子', [
+  endingBox('good', '🤝 渔民的林子',
+    [
     '✅ 保住约 <b>一半</b> 碳库，每年还在继续封存',
     '💰 管护费省下一大半，村民多了新收入',
     '🦐 虾塘改生态养法，废水少了一大半',
     '🚫 偷猎、倒垃圾——村里人自己就管住了'
-  ], '最好的围栏，不是铁丝网，是人心。');
+    ],
+    [
+    '⚠️ 先前被砍掉的那一半，损失已无法挽回'
+    ], '最好的围栏，不是铁丝网，是人心。');
   fBusy = false;
 }
 
@@ -1239,12 +1284,13 @@ async function fateHalfSign(){
   await wait(2600);
   narr('📉 一年后再看：牌子歪了。林子里多了电鱼的船，和倒垃圾的三轮车。');
   await wait(1200);
-  endingBox('bad', '🪧 挂牌的保护', [
+  endingBox('bad', '🪧 挂牌的保护', [],
+    [
     '⚠️ 没人巡护：电鱼、盗猎、倒垃圾照旧',
     '⚠️ 剩下的一半林子，也在悄悄漏碳',
     '💰 牌子花了 8 万，管护花了 0 元',
     '🐦 水鸟越来越少，最后连牌子也锈了'
-  ], '一块牌子，护不住一片林子。');
+    ], '一块牌子，护不住一片林子。');
   fBusy = false;
 }
 
@@ -1352,12 +1398,15 @@ async function fateBigBuild(){
   });
   callout('📉 脚步踩实滩涂，灯光惊走夜鸟：碳库增长<b>减半</b>（每年约 0.7–1 吨/公顷）。');
   await wait(2800);
-  endingBox('mid', '🏨 甜蜜的负担', withChoices([
-    '💰 旅游收入约 <b>+1.2 亿</b>（10 年）',
+  endingBox('mid', '🏨 甜蜜的负担', ...withChoices(
+    [
+    '💰 旅游收入约 <b>+1.2 亿</b>（10 年）'
+    ],
+    [
     '🐦 灯光与人流惊扰，<b>候鸟少了一大半</b>',
     '📉 滩涂被踩实，碳库增长<b>减半</b>（每年约 0.7–1 吨/公顷）',
     '🦐 附近的渔业和养殖也没有起色'
-  ]), '账面赚钱了。可这片林子最值钱的东西，正在悄悄变少。');
+    ]), '账面赚钱了。可这片林子最值钱的东西，正在悄悄变少。');
   fBusy = false;
 }
 
@@ -1390,12 +1439,16 @@ async function fateEco(){
   fx.className = ''; fx.classList.add('glow');
   callout('🎓 来研学的孩子，把蓝碳的故事讲给了更多人听。');
   await wait(2800);
-  endingBox('good', '🌿 双赢', withChoices([
+  endingBox('good', '🌿 双赢', ...withChoices(
+    [
     '💰 研学与门票约 <b>+3,000 万</b>（10 年）',
     '🌱 碳库每年继续封存 <b>1.5–2 吨/公顷</b>',
     '🦅 <b>262 种鸟类</b>都还在，黑脸琵鹭准时到访',
     '🎓 研学课程成了周边学校的固定项目'
-  ]), '克制，是最高级的开发——钱赚了，鸟没走，碳还在长。');
+    ],
+    [
+    '📅 每天限 200 人，收入有天花板，旺季预约要排队'
+    ]), '克制，是最高级的开发——钱赚了，鸟没走，碳还在长。');
   fBusy = false;
 }
 
@@ -1428,12 +1481,16 @@ async function fateCarbon(){
   await wait(2800);
   narr('💼 拍卖槌「咚」地落下。这笔钱付了巡护员的工资、清了海漂垃圾——树，一棵都没砍。');
   await wait(1600);
-  endingBox('good', '💨 会呼吸的存折', withChoices([
+  endingBox('good', '💨 会呼吸的存折', ...withChoices(
+    [
     '💰 <b>3,875 吨</b>碳汇拍出 <b>187 万元</b>（2023 年全国首单）',
     '💼 卖碳的钱付巡护员工资、清理海漂垃圾',
     '🌱 树一棵没砍，碳库越存越厚',
     '🦅 <b>262 种鸟类</b>照常安家，黑脸琵鹭准时到访'
-  ]), '林子站着不动也能挣钱——它每吸一口碳，这本存折就厚一分。');
+    ],
+    [
+    '💰 碳汇市场刚起步，价格还不高（485 元/吨），谈不上大钱'
+    ]), '林子站着不动也能挣钱——它每吸一口碳，这本存折就厚一分。');
   fBusy = false;
 }
 
@@ -1455,12 +1512,16 @@ async function fateWild(){
   }
   fx.className = ''; fx.classList.add('glow');
   await wait(2800);
-  endingBox('good', '🌙 沉睡的宝藏', withChoices([
+  endingBox('good', '🌙 沉睡的宝藏', ...withChoices(
+    [
     '🌱 碳库每年封存 <b>1.5–2 吨/公顷</b>，无人打扰',
     '🐦 <b>262 种鸟类</b>安家，黑脸琵鹭年年回来',
-    '💰 公园之外没有新收入，管护还要花钱',
     '🌊 台风来的时候，是这片林子在替城市挡浪'
-  ]), '有些价值写不进账本——比如安静，比如等待。');
+    ],
+    [
+    '💰 公园之外没有新收入，管护还要花钱',
+    '🌙 名气用不上——研学、文创这些机会，都让给了安静'
+    ]), '有些价值写不进账本——比如安静，比如等待。');
   fBusy = false;
 }
 
